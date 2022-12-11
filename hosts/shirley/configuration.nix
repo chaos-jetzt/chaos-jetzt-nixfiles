@@ -1,5 +1,5 @@
 { pkgs, baseDomain, ... }: {
-  _module.args.baseDomain = "dev.chaos.jetzt";
+  _module.args.baseDomain = "chaos.jetzt";
 
   imports = [
     ./hardware-config.nix
