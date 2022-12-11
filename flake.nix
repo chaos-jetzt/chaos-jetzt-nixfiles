@@ -31,6 +31,12 @@
           ./hosts/shirley/configuration.nix
         ];
       };
+      goldberg = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = defaultModules ++ [
+          ./hosts/goldberg/configuration.nix
+        ];
+      };
     };
 
     colmena = {
