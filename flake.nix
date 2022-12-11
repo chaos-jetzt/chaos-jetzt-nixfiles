@@ -20,9 +20,6 @@
         nixpkgs.overlays = [ overlay ];
         _module.args = {
           inherit nixpkgs;
-          # TODO: Change when going to production
-          # Not sure if this is the best way to do this
-          baseDomain = "dev.chaos.jetzt";
         };
       }
     ];
@@ -58,6 +55,5 @@
 
     overlays.default = overlay;
     legacyPackages.x86_64-linux = pkgs;
-
   };
 }

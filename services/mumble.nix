@@ -1,5 +1,4 @@
 { config, baseDomain, lib, ... }: {
-
   sops.secrets."murmur/registry_password".owner = "murmur";
   security.acme.certs."mumble.${baseDomain}" = {
     group = "murmur";
