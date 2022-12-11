@@ -2,7 +2,6 @@ keys:
   # People
   # TODO: Add @ruru (I was not able to find a current gpg key @e1mo)
   - &e1mo 0x6D617FD0A85BAADA
-  - &leona 0xD5B08ADFC75E3605
   - &n0emis 0xE0262A773B824745
 
   # Servers
@@ -10,11 +9,11 @@ keys:
 creation_rules:
   - path_regex: secrets\/all\/*
     key_groups:
-      - pgp: [ *e1mo, *leona, *n0emis ]
+      - pgp: [ *e1mo, *n0emis ]
         age:
         - *shirley
   - path_regex: secrets\/shirley\/*
     key_groups:
-      - pgp: [ *e1mo, *leona, *n0emis ]
+      - pgp: [ *e1mo, *n0emis ]
         age:
         - *shirley
