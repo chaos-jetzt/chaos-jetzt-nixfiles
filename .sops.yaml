@@ -3,6 +3,7 @@ keys:
   # TODO: Add @ruru (I was not able to find a current gpg key @e1mo)
   - &e1mo 0x6D617FD0A85BAADA
   - &n0emis 0xE0262A773B824745
+  - &adb B1480CFF9BBE8E2648A26A640B2E7C171E3AD6D7
 
   # Servers
   - &shirley age14ysl953378r2vvy7ft3gwce9xp83pr6wypf5lgx2yjwx2lxra5qs6j8eqe
@@ -10,18 +11,17 @@ keys:
 creation_rules:
   - path_regex: secrets\/all\/*
     key_groups:
-      - pgp: [ *e1mo, *n0emis ]
+      - pgp: [ *e1mo, *n0emis, *adb ]
         age:
         - *shirley
         - *goldberg
   - path_regex: secrets\/shirley\/*
     key_groups:
-      - pgp: [ *e1mo, *n0emis ]
+      - pgp: [ *e1mo, *n0emis, *adb ]
         age:
         - *shirley
   - path_regex: secrets\/goldberg\/*
     key_groups:
-      - pgp: [ *e1mo, *n0emis ]
+      - pgp: [ *e1mo, *n0emis, *adb ]
         age:
-        - *shirley
         - *goldberg
