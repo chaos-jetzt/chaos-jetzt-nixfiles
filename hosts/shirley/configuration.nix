@@ -5,6 +5,7 @@
     ./hardware-config.nix
     ../../services/mumble.nix
     ../../services/website.nix
+    ../../services/vaultwarden.nix
   ];
 
   system.stateVersion = "23.05";
