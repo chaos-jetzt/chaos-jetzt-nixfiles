@@ -18,10 +18,6 @@ NixOS configuration for the [chaos.jetzt] project. They are very much work in pr
 - [maubot github](https://github.com/maubot/github)
   - Not packaged for nix
   - Ditch it?
-- [pretix](https://github.com/pretix/pretix)
-  - Not aware of nix packaging
-  - Not really used
-  - Maybe skip it (for now) and use the instance of another space?
 
 ## Development setup
 
