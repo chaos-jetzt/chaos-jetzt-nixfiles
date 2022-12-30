@@ -73,7 +73,7 @@
     "SSO" = "Single Sign-on";
     "sso" = SSO;
     "CTFL" = "Chaostreff Flensburg e.V.";
-    "ctfl" = SSO;
+    "ctfl" = CTFL;
   };
 
   acronyms_file = pkgs.writeText "acronyms.local.conf" ''

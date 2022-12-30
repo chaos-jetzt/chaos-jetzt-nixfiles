@@ -7,8 +7,6 @@ NixOS configuration for the [chaos.jetzt] project. They are very much work in pr
 - [mumble-web](https://github.com/johni0702/mumble-web), possibly adding [mumble-web-proxy](https://github.com/johni0702/mumble-web-proxy/) on top
   - Both need to be packaged for Nix
 - [Dokuwiki](https://www.dokuwiki.org/dokuwiki)
-  - NixOS module exists: `services.dokuwiki`
-  - Data migration
   - Migrate away from SSO
 - [freescout-helpdesk](https://github.com/freescout-helpdesk)
   - @e1mo is already working on a nix package + NixOS module for their private nixfiles
