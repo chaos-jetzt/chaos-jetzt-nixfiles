@@ -6,6 +6,7 @@
     ../../services/mumble.nix
     ../../services/website.nix
     ../../services/vaultwarden.nix
+    ../../services/dokuwiki.nix
   ];
 
   system.stateVersion = "23.05";
