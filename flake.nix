@@ -19,7 +19,8 @@
       {
         nixpkgs.overlays = [ overlay ];
         _module.args = {
-          inherit nixpkgs;
+          inherit inputs;
+          outputs = self;
         };
       }
     ];

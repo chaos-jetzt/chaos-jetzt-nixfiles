@@ -1,6 +1,8 @@
-{ config, lib, pkgs, nixpkgs, ... }: {
+{ config, lib, pkgs, inputs, ... }: {
   imports = [
     ./users.nix
+    # Monitoring is applicable to all hosts, thus placing it here
+    ../services/monitoring
   ];
 
   environment.systemPackages = with pkgs; [
@@ -19,7 +21,7 @@
     package = pkgs.nixVersions.stable;
     settings.auto-optimise-store = lib.mkDefault true;
     settings.trusted-users = [ "root" "@wheel" ];
-    registry.nixpkgs.flake = nixpkgs;
+    registry.nixpkgs.flake = inputs.nixpkgs;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
