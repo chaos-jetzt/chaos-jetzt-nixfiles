@@ -1,0 +1,139 @@
+---
+groups:
+  - name: General system
+    rules:
+      - record: node_memory_MemAvailable_percentage
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100
+      - record: node_cpu_count
+        expr: count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          serverity: critical
+        annotations:
+          summary: "{{ $labels.instance }} down"
+
+      - alert: SystemdServiceFailed
+        expr: node_systemd_unit_state{state="failed"} > 0
+        for: 5m
+        labels:
+          serverity: error
+        annotations:
+          summary: "{{ $labels.name }} on {{ $labels.instance }} crashed"
+
+      - alert: OomKill
+        expr: increase(node_vmstat_oom_kill[5m]) > 0 # Scrape interval of 1 minute
+        for: 0m
+        labels:
+          serverity: error
+        annotations:
+          summary: "OOM kill on {{ $labels.instance }}"
+
+      - alert: VeryLowAvailableMemory
+        # Less than 3% available or less than 100KB available memory
+        expr: ((node_memory_MemAvailable_percentage < 3) or (node_memory_MemFree_bytes < (1024 * 100)))
+        for: 2m
+        labels:
+          serverity: critical
+        annotations:
+          summary: "Very low free memory on {{ $labels.instance }}"
+
+      - alert: LowAvailableMemory
+        expr: node_memory_MemAvailable_percentage < 10
+        for: 5m
+        labels:
+          serverity: warn
+        annotations:
+          summary: "Low free memory on {{ $labels.instance }}"
+
+      - alert: ReducedAvailableMemory
+        expr: node_memory_MemAvailable_percentage < 20
+        # Detect constant high memory usage as a potential sign that the host could maybe need some more memory
+        for: 1h
+        labels:
+          serverity: info
+        annotations:
+          summary: "Reduced available memory on {{ $labels.instance }}"
+
+      - alert: HighMemoryPressure
+        # For at least 5 seconds over the last 2 Minutes, no progress could be made
+        # due to memory congestion
+        expr: increase(node_pressure_memory_stalled_seconds_total[2m]) >= 5
+        labels:
+          serverity: error
+        annotations:
+          summary: "Memory preassure on {{ $labels.instance }}"
+
+      - alert: VeryHighLoad
+        expr: ((node_load1 / node_cpu_count) > 1) or ((node_load5 / node_cpu_count) > 0.9)
+        for: 5m
+        labels:
+          serverity: error
+        annotations:
+          summary: "Very High load on {{ $labels.instance }}"
+
+      - alert: HighLoad
+        expr: ((node_load1 / node_cpu_count) > 0.9) or ((node_load5 / node_cpu_count) > 0.8)
+        for: 10m
+        labels:
+          serverity: warn
+        annotations:
+          summary: "High load on {{ $labels.instance }}"
+
+      - alert: ElevatedLoad
+        # Detecting a long-term increased load
+        expr: (node_load15 / node_cpu_count) > 0.7
+        for: 15m
+        labels:
+          serverity: info
+        annotations:
+          summary: "Elevated load15 on {{ $labels.instance }}"
+
+      - alert: LowFreeDiskSpace
+        expr:  node_filesystem_readonly == 0 and ON (instance, device, mountpoint) (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 15
+        for: 10m
+        labels:
+          serverity: info
+        annotations:
+          summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} has less than 15% space left"
+
+      - alert: VeryLowFreeDiskSpace
+        expr:  node_filesystem_readonly == 0 and ON (instance, device, mountpoint) (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 5
+        for: 3m
+        labels:
+          serverity: error
+        annotations:
+          summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} has less than 5% space left"
+
+  - name: Prometheus Alertmanager
+    rules:
+      - alert: AlertmanagerMissing
+        expr: prometheus_notifications_alertmanagers_discovered < 1
+        for: 5m
+        labels:
+          serverity: warn
+        annotations:
+          summary: "No connected alertmanager on {{ $labels.instance }}"
+
+      - alert: AlertmanagerMissing
+        expr: increase(prometheus_notifications_dropped_total[5m]) > 0
+        labels:
+          serverity: error
+        annotations:
+          summary: "Dropped alert notifications on {{ $labels.instance }}"
+
+      - alert: FailingAlertmanagerNotifications
+        expr: increase(alertmanager_notifications_failed_total[5m]) > 0
+        labels:
+          serverity: error
+        annotations:
+          summary: "Failing notifications via {{ $labels.integration }} on {{ $labels.instance }}"
+
+      - alert: FailingRuleEvaluation
+        expr: sum by (instance) (increase(prometheus_rule_evaluation_failures_total[5m])) > 0
+        labels:
+          serverity: warn
+        annotations:
+          summary: "Failing rule evaluations on {{ $labels.instance }}"
