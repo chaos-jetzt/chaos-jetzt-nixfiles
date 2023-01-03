@@ -83,10 +83,8 @@ in {
   /*
   Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
 
-  1. `sops -d secrets/all/monitoring.htpasswd > /tmp/monitoring.htpasswd`
-  2. Use `htpasswd` (from the `apacheHttpd` package) to your hearts content
-  3. `sops -e /tmp/monitoring.htpasswd > secrets/all/monitoring.htpasswd`
-  4. `rm /tmp/monitoring.htpasswd`
+  1. Use `htpasswd` (from the `apacheHttpd` package) to generate the hashed password
+  2. `sops secrets/all/monitoring.htpasswd` and replace/add the specfic lines
   */
   sops.secrets = {
     "monitoring.htpasswd" = {
