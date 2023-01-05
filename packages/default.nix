@@ -2,13 +2,14 @@ final: prev:
 
 {
   chaos-jetzt-website-pelican = final.stdenv.mkDerivation {
-    name = "chaos-jetzt-website-pelican";
+    pname = "chaos-jetzt-website-pelican";
+    version = "2023-01-05";
 
     src = prev.fetchFromGitHub {
       owner = "chaos-jetzt";
       repo = "website_pelican";
-      rev = "89b1020678886a07446ac98db275a6db995c53ec";
-      hash = "sha256-T3MSxMshlH3nFOttajDdacWGi1g+TkhjFlr+MjQlb/4=";
+      rev = "eb3e32ce87df9a5be3530d57215b997bcac34d81";
+      hash = "sha256-PDxdlO1DYbgcz5BpEkpiqxT0hGKi0RSIpA+d2WKt8J0=";
     };
     installTargets = "build";
     buildFlags = [
