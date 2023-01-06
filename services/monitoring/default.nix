@@ -132,6 +132,15 @@ in {
     ];
   };
 
+  networking.firewall.interfaces.ens10.allowedTCPPorts = let
+    inherit (config.services) prometheus;
+    ifEnabled = x: lib.optional x.enable x.port;
+  in (
+    (ifEnabled prometheus)
+    ++ (ifEnabled prometheus.alertmanager)
+    ++ (ifEnabled prometheus.exporters.node)
+  );
+
   services.prometheus = {
     enable = true;
     webExternalUrl = "https://${fqdn}/prometheus/";
