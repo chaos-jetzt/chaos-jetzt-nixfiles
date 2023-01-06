@@ -7,6 +7,7 @@
     ../../services/website.nix
     ../../services/vaultwarden.nix
     ../../services/dokuwiki.nix
+    ../../services/freescout.nix
   ];
 
   system.stateVersion = "23.05";
