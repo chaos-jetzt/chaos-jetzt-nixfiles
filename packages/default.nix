@@ -145,4 +145,35 @@ final: prev:
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
   };
+
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [(
+    pfinal: pprev: {
+      matrix-synapse-saml-mapper = pfinal.buildPythonPackage {
+        pname = "matrix-synapse-saml-mapper";
+        version = "2020-09-21";
+
+        postPatch = ''
+          substituteInPlace setup.py \
+            --replace "attr>=0.3.1" "attrs"
+        '';
+
+        src = final.fetchFromGitHub {
+          owner = "chaos-jetzt";
+          repo = "matrix-synapse-saml-mapper";
+          rev = "1aca2bfc73568a1a25d4e63a52b7a8ea9bdb7272";
+          hash = "sha256-mieJ8ECYr0hiniMHSnEbQAi/W9x1lsAMqV12qHtql5E=";
+          leaveDotGit = true;
+        };
+
+        nativeBuildInputs = with pfinal; [
+          setuptools-scm
+          final.git
+        ];
+        propagatedBuildInputs = with pfinal; [
+          pysaml2
+          attrs
+          final.matrix-synapse
+        ];
+      };
+  })];
 }

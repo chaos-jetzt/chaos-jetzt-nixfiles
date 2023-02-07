@@ -1,10 +1,11 @@
-{ lib, pkgs, baseDomain, ... }: {
+{ lib, pkgs, config, ... }: {
   cj.deployment.environment = "dev";
 
   imports = [
     ./hardware-config.nix
     ../../services/mumble.nix
     ../../services/website.nix
+    ../../services/matrix.nix
     ../../services/vaultwarden.nix
     ../../services/dokuwiki.nix
     ../../services/freescout.nix
@@ -32,4 +33,13 @@
     registerPassword = lib.mkForce "";
     environmentFile = lib.mkForce null;
   };
+
+  # This is specific to every host!
+  systemd.mounts = [{
+    what = "/dev/disk/by-id/scsi-0HC_Volume_27793580";
+    where = config.services.matrix-synapse.settings.media_store_path;
+    type = "ext4";
+    options = "discard,nofail,defaults";
+    wantedBy = [ "multi-user.target" ];
+  }];
 }
