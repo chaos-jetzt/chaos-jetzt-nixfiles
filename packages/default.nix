@@ -24,14 +24,6 @@ final: prev:
     ];
   };
 
-  dokuwiki = prev.dokuwiki.overrideAttrs (oldAttrs: {
-    installPhase = ''
-      ${oldAttrs.installPhase}
-
-      runHook postInstall
-    '';
-  });
-
   dokuwikiPlugins = {
     tag = final.stdenv.mkDerivation rec {
       name = "tag";

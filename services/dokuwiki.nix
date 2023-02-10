@@ -5,10 +5,6 @@
   baseDomain,
   ...
 }: let
-  inherit (builtins) any hasAttr isAttrs isBool isInt isList isString;
-  inherit (lib) boolToString concatMapStringsSep concatStringsSep escapeShellArg flatten mapAttrsToList;
-
-  cfg = config.services.dokuwiki.sites.${dw_domain};
   fpm_pool = "dokuwiki-${dw_domain}";
   fpm_cfg = config.services.phpfpm.pools.${fpm_pool};
   dw_domain = "wiki.${baseDomain}";
@@ -58,7 +54,7 @@ in {
     package = pkgs.dokuwiki.overrideAttrs (oldAttrs: {
       name = "dokuwiki-${dw_domain}-with-acronyms-${oldAttrs.version}";
       postInstall = oldAttrs.postInstall or "" + ''
-          ln -s ${acronyms_file} $out/share/dokuwiki/conf/acronyms.local.conf
+          ln -sf ${acronyms_file} $out/share/dokuwiki/conf/acronyms.local.conf
         '';
     });
 
