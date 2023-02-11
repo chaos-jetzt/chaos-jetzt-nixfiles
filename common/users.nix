@@ -35,7 +35,7 @@
       isNormalUser = true;
       extraGroups = [ "wheel" ];
       openssh.authorizedKeys.keys = [
-        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCwOSpmsFqj4JuuxBhpmFZ0lVyMrnwjHHP5VNJRIGFmo5kL//vpP/e70h5bIVgLXoGtloKlvopjEb6zP74JwLMMOzsNmHI3HPe4x1/KpIMoYvbdMMR85CGbZjS/Npy/rxlOxu7MkVj3I1HLpfQMFoihwYPlTcLAp+XEFdeQ01emxANa1bQj/8ttpkFRAg0GOGXfxkcQK8CVYFiuyMfOYrUcWqr5tQI50XIA4GWohSyO/9OOXvJ3u1MGoWZFg+3ABLJ8VIgMEcMPKjRHyYEJbL0b4D3YaFCx8Spyrol4zQ45Q+I3zMkxsuokFcqaT8EzE6Z7dWQ/1V4RpsfzsZ6mK186F+Q/D1gPapQUeOX0X1RubKrX0mIqbB9QBflDASRVHfAONC6lfE6iaEcXJKzYH9ldfQHgHep42zcFQpl7wrYd4fTabfqvScfwamkb6vF/JsDBwQ6Ukr7lBjgc4BSxwMmO259DzU+9caovzUl3iL1o4NtEcVEcSKcciZ7w9x5T01k= adb@adb-ux370uaf"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINKZWuy/DFrEHKDdYvids/yXuDmf9t+HX6G1K8Ne1hhr admin@adb.sh"
       ];
     };
   };

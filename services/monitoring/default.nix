@@ -220,7 +220,7 @@ in {
         email_configs = [
           { to = "jetzt+mon@e1mo.de";
             send_resolved = true; }
-          { to = "info@adb.sh";
+          { to = "admin+mon@adb.sh";
             send_resolved = true; }
         ];
       }];
