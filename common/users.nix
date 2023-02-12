@@ -38,5 +38,12 @@
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINKZWuy/DFrEHKDdYvids/yXuDmf9t+HX6G1K8Ne1hhr admin@adb.sh"
       ];
     };
+    momme = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" ];
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPGZ1R2leDvakw36bFBa9U7IQruW6DjbHahHfZqTerD6 momme"
+      ];
+    };
   };
 }
