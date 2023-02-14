@@ -42,7 +42,7 @@ colmena apply --on host-a
 
 # A VM of the host can be built using plain nix build
 
-nix build .\#nixosConfigurations.host-a.config.system.build.vmWithBootloader
+nix build .\#nixosConfigurations.host-a.config.system.build.vmWithBootLoader
 ```
 
 **Note on VMs**: Since the secrets are decrypted for each servers ssh key, the secrets setup will fail.
