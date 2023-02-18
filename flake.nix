@@ -8,6 +8,7 @@
     freescout-nix = {
       url = "git+https://cyberchaos.dev/e1mo/freescout-nix-flake?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
   };
 

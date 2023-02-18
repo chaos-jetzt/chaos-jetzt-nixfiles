@@ -11,8 +11,6 @@
     enable = true;
     domain = "support.${baseDomain}";
 
-    phpPackage = pkgs.php80;
-
     settings = {
       APP_KEY._secret  = config.sops.secrets."freescout/app_key".path;
       APP_ENV = "local";
