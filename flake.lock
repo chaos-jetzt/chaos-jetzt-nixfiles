@@ -17,34 +17,21 @@
         "type": "indirect"
       }
     },
-    "flake-utils_2": {
-      "locked": {
-        "lastModified": 1667395993,
-        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "freescout-nix": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": [
+          "flake-utils"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1673517701,
-        "narHash": "sha256-m6JDhvbljk+8dSqjJSQaovM9ibHhbPZv6d8I7PrlibI=",
+        "lastModified": 1681394336,
+        "narHash": "sha256-53rbYDTn79tzi/IhGaaqUC35aYLJUI1rXUKvcZVP20Q=",
         "ref": "main",
-        "rev": "a6ef9643d794085afaa2b574bf7373090026d917",
-        "revCount": 8,
+        "rev": "306011b892125dc0c5012dda2bfa3c54b8341b0c",
+        "revCount": 16,
         "type": "git",
         "url": "https://cyberchaos.dev/e1mo/freescout-nix-flake"
       },
