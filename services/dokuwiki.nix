@@ -149,6 +149,7 @@ in {
 
     phpOptions = {
       expose_php = "Off";
+      "date.timezone" = "${config.time.timeZone}";
       "opcache.interned_strings_buffer" = "8";
       "opcache.max_accelerated_files" = "10000";
       "opcache.memory_consumption" = "64";
