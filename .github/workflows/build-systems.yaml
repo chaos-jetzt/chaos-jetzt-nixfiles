@@ -24,10 +24,10 @@ jobs:
     - uses: cachix/install-nix-action@v20
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - uses: cachix/cachix-action@v12
-      with:
-        name: chaos-jetzt-nixfiles
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    #- uses: cachix/cachix-action@v12
+    #  with:
+    #    name: chaos-jetzt-nixfiles
+    #    authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: nix flake check
       run: |
         nix flake check --no-build
@@ -47,7 +47,8 @@ jobs:
           echo "::group::Building ${host}"
           drv=".#nixosConfigurations.$host.config.system.build.toplevel"
           build_cmd="nix build ${drv}"
-          cachix watch-exec chaos-jetzt-nixfiles -- $build_cmd
+          #cachix watch-exec chaos-jetzt-nixfiles -- $build_cmd
+          $build_cmd
           echo "::endgroup::"
           out_path=$($build_cmd --print-out-paths)
           echo -e "\x1b[32;1mSuccessfully built .#nixosConfigurations.${host}\x1b[0m"
