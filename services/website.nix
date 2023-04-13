@@ -23,14 +23,33 @@ in {
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
 
+    commonHttpConfig = ''
+      map $http_accept $webp_suffix {
+        default "";
+        "~*webp" ".webp";
+      }
+      map $http_accept $avif_suffix {
+        default "";
+        "~*avif" ".avif";
+      }
+    '';
+
     virtualHosts.${baseDomain} = {
       default = true;
       enableACME = true;
       forceSSL = true;
       serverAliases = [ "www.${baseDomain}" ];
-      # TODO: Change this to be deployed by some sort of CI + rsync so we don't need to always update the package version
-      locations."/".root = webroot;
-      locations."/.well-known/matrix/".alias =  matrixWellKnownDir + "/";
+      root = webroot;
+      locations = {
+        "~* ^(/images/.+)\\.(png|jpe?g)$".extraConfig = ''
+          set $base $1;
+          add_header Vary Accept;
+          expires 7d;
+          add_header Cache-Control "must-revalidate, s-maxage=86400";
+          try_files $request_uri$avif_suffix $base$avif_suffix $request_uri$webp_suffix $base$webp_suffix $request_uri =404;
+        '';
+        "/.well-known/matrix/".alias =  matrixWellKnownDir + "/";
+      };
     };
   };
 
