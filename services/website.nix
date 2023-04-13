@@ -41,6 +41,10 @@ in {
       serverAliases = [ "www.${baseDomain}" ];
       root = webroot;
       locations = {
+        "/".extraConfig = ''
+          log_not_found off;
+          error_page 404 /404.html;
+        '';
         "~* ^(/images/.+)\\.(png|jpe?g)$".extraConfig = ''
           set $base $1;
           add_header Vary Accept;
