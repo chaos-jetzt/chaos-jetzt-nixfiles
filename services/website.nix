@@ -41,6 +41,10 @@ in {
       serverAliases = [ "www.${baseDomain}" ];
       root = webroot;
       locations = {
+        # A ?version= is appeneded to the font files, so we can be quite liberal
+        "/theme/fonts/open-sans/fonts/".extraConfig = ''
+          expires 1M;
+        '';
         "/".extraConfig = ''
           log_not_found off;
           error_page 404 /404.html;
