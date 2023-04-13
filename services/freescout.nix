@@ -10,6 +10,7 @@
   services.freescout = {
     enable = true;
     domain = "support.${baseDomain}";
+    phpPackage = pkgs.php82;
 
     settings = {
       APP_KEY._secret  = config.sops.secrets."freescout/app_key".path;
