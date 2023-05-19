@@ -51,11 +51,13 @@
     };
 
     colmena = {
+      meta.allowApplyAll = false;
       meta.nixpkgs = import nixpkgs {
         system = "x86_64-linux";
       };
       defaults = { name, ... }: {
         deployment = {
+          tags = if name == "shirley" then [ "prod" ] else [ "dev" ];
           # TODO: It'd probably be nice to derive that from the host-configured fqdn
           targetHost = "${name}.net.chaos.jetzt";
           targetUser = null;
