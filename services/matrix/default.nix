@@ -12,6 +12,7 @@ in {
       mode = "0600";
     };
     "synapse/secret_config".owner = "matrix-synapse";
+    "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
   services.nginx.virtualHosts = {
@@ -78,6 +79,8 @@ in {
       public_baseurl = "https://matrix.${baseDomain}";
       allow_public_rooms_over_federation = true;
       enable_registration = false;
+      registration_shared_secret_path = config.sops.secrets."synapse/registration_shared_secret".path;
+      log_config = ./synapse-log_config.yaml;
       database = {
         name = "psycopg2";
         args.database = "matrix-synapse";

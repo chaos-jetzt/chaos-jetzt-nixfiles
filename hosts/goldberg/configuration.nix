@@ -5,7 +5,7 @@
     ./hardware-config.nix
     ../../services/mumble.nix
     ../../services/website.nix
-    ../../services/matrix.nix
+    ../../services/matrix
     ../../services/vaultwarden.nix
     ../../services/dokuwiki.nix
     ../../services/freescout.nix

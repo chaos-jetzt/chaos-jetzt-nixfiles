@@ -6,7 +6,7 @@
     ../../services/mumble.nix
     ../../services/website.nix
     ../../services/vaultwarden.nix
-    ../../services/matrix.nix
+    ../../services/matrix
     ../../services/dokuwiki.nix
     ../../services/freescout.nix
     ../../services/hedgedoc.nix
