@@ -28,12 +28,12 @@ final: prev:
     tag = final.stdenv.mkDerivation rec {
       name = "tag";
       pname = "dokuwiki-plugin-tag";
-      version = "2022-10-02";
+      version = "2023-05-25";
       src = final.fetchFromGitHub {
         owner = "dokufreaks";
         repo = "plugin-tag";
         rev = version;
-        hash = "sha256-DVO3ZtXTtF8pBroF5VQiR2Vqa/FPxVzq81Jv9e9Z2EU=";
+        hash = "sha256-HipMbLK6LSdBfHGW03ekLp3Rvh2JQbAPyVIRRHug4GU=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
@@ -49,27 +49,27 @@ final: prev:
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
-    smtp = final.stdenv.mkDerivation {
+    smtp = final.stdenv.mkDerivation rec  {
       name = "smtp";
       pname = "dokuwiki-plugin-smtp";
-      version = "2022-09-11";
+      version = "2023-04-03";
       src = final.fetchFromGitHub {
         owner = "splitbrain";
         repo = "dokuwiki-plugin-smtp";
-        rev = "31226785e712be0c042f824019c08b7824db90ea";
-        hash = "sha256-fwhOePzWGORmjS47/p+MZGhu1YstamlhdTjCxftu9eE=";
+        rev = version;
+        hash = "sha256-nvVsL94jJNu7wvyTL5hwMaSBTKHA3Z3YWg7+QtSZ8ss=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
     nspages = final.stdenv.mkDerivation {
       name = "nspages";
       pname = "dokuwiki-plugin-nspages";
-      version = "2022-11-27";
+      version = "2023-05-29";
       src = final.fetchFromGitHub {
         owner = "gturri";
         repo = "nspages";
-        rev = "2aeaf7dff24d8ce62a93477357e34834436634ff";
-        hash = "sha256-U/mP8wtT6qE/MqMxePUt8XPD9kkGLErdWW0RCIQZZMI=";
+        rev = "8763b40b3e9c79042055135e7c157aeaed5c078b";
+        hash = "sha256-Fa8gtImR8tP8Vnhys9rZdtxl8Ii8cfrXZsTFNC0sD3w=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
@@ -96,19 +96,19 @@ final: prev:
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
-    oauth = final.stdenv.mkDerivation {
+    oauth = final.stdenv.mkDerivation rec {
       name = "oauth";
       pname = "dokuwiki-plugin-oauth";
-      version = "2022-10-25";
+      version = "2023-03-27";
       src = final.fetchFromGitHub {
         owner = "cosmocode";
         repo = "dokuwiki-plugin-oauth";
-        rev = "da4733221ed7b4fb3ac0e2429499b14ece3d5f2d"; # 2022-10-25
-        hash = "sha256-CNRlaieYm/KCjZ9+OP9pMo5SGjJ4CUrNNdL4iVktCcU=";
+        rev = version;
+        hash = "sha256-jyyKEhKp6LyHIq8vmaS1WOc+uyNxwHMt0kmSTSuOGKo=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
-    oauthkeycloak = final.stdenv.mkDerivation {
+    oauthkeycloak = final.stdenv.mkDerivation rec {
       name = "oauthkeycloak";
       pname = "dokuwiki-plugin-oauthkeycloak";
       version = "2022-03-17";
@@ -123,12 +123,12 @@ final: prev:
     edittable = final.stdenv.mkDerivation rec {
       name = "edittable";
       pname = "dokuwiki-plugin-edittable";
-      version = "2022-01-22";
+      version = "2023-01-14";
       src = final.fetchFromGitHub {
         owner = "cosmocode";
         repo = "edittable";
         rev = version;
-        hash = "sha256-KzNUcZcK/y4SNdzuQACS+GqrrnaZIJlXFWUcYtfSxWY=";
+        hash = "sha256-Mns8zgucpJrg1xdEopAhd4q1KH7j83Mz3wxuu4Thgsg=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
