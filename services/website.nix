@@ -82,4 +82,14 @@ in {
       chown -R web-deploy:${config.services.nginx.group} ${webroot}
     fi
   '';
+
+  # Delete dev website builds older than 28 days
+  systemd.services."website-purge-old" = lib.mkIf isDev {
+    path = with pkgs; [ fd ];
+    script = ''
+      fd --print0 --changed-before 28d --type d --max-depth 1 --min-depth 1 . ${webroot} --exec-batch rm -vr {} \;
+    '';
+    startAt = "weekly";
+    serviceConfig.User = "web-deploy";
+  };
 }
