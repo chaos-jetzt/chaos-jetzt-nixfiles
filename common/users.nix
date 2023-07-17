@@ -17,13 +17,6 @@
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID9x/kL2fFqQSEyFvdEgiM2UKYAZyV1oct9alS6mweVa e1mo (ssh_0x6D617FD0A85BAADA)"
       ];
     };
-    n0emis = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" ];
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEcOPtW5FWNIdlMQFoqeyA1vHw+cA8ft8oXSbXPzQNL9 n0emis@n0emis.eu"
-      ];
-    };
     ruru = {
       isNormalUser = true;
       extraGroups = [ "wheel" ];
