@@ -23,7 +23,13 @@ in {
       root = pkgs.element-web.override {
         # Somewhat duplicate of the stuff in website.nix but I am
         # not sure if we absolutely need to dedup this, just out of complexity perspective
-        conf.default_server_config."m.homeserver".base_url = "https://matrix.${baseDomain}/";
+        conf = {
+          default_server_config."m.homeserver" = {
+            base_url = "https://matrix.${baseDomain}/";
+            server_name = baseDomain;
+          };
+          default_country_code = "DE";
+        };
       };
     };
     "matrix.${baseDomain}"  = {
@@ -97,7 +103,6 @@ in {
         "fc00::/7"
       ];
       
-      additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
       admin_contact = "mailto:administration@chaos.jetzt";
       url_preview_enabled = true;
       media_store_path = "/mnt/synapse_media_store";
@@ -136,16 +141,16 @@ in {
       # For our saml sso stuff we need to have additional_ressouces, but they are not possible with the NixOS module listener
       (format "additional_ressources.yaml" {
         listeners = [{
-        bind_addresses = [ "::1" "127.0.0.1" ];
-        port = matrixPort;
-        type = "http";
-        tls = false;
-        x_forwarded = true;
-        resources = [{
-          names = [ "client" "federation" ];
-          compress = false;
-        }];
-        additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
+          bind_addresses = [ "::1" "127.0.0.1" ];
+          port = matrixPort;
+          type = "http";
+          tls = false;
+          x_forwarded = true;
+          resources = [{
+            names = [ "client" "federation" ];
+            compress = false;
+          }];
+          additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
         }];
       })
     ];

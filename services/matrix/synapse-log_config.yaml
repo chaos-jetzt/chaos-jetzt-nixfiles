@@ -1,5 +1,5 @@
 # Based on https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/matrix/synapse-log_config.yaml
-# Just with a log-level of notice
+# Just with a log-level of warning
 version: 1
 
 # In systemd's journal, loglevel is implicitly stored, so let's omit it
