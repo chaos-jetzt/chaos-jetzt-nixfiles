@@ -1,33 +1,20 @@
 name: "Build system config"
 on:
   pull_request:
+  workflow_dispatch:
   push:
+    branches: [ main ]
+
 jobs:
-  avoid_duplicates:
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
-        with:
-          # All of these options are optional, so you can remove them if you are happy with the defaults
-          concurrent_skipping: 'same_content_newer'
-          skip_after_successful_duplicate: 'true'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
   build:
     runs-on: ubuntu-latest
-    needs: avoid_duplicates
-    if: needs.avoid_duplicates.outputs.should_skip != 'true'
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - uses: cachix/install-nix-action@v20
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    #- uses: cachix/cachix-action@v12
-    #  with:
-    #    name: chaos-jetzt-nixfiles
-    #    authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: nix flake check
       run: |
         nix flake check --no-build
@@ -53,4 +40,31 @@ jobs:
           out_path=$($build_cmd --print-out-paths)
           echo -e "\x1b[32;1mSuccessfully built .#nixosConfigurations.${host}\x1b[0m"
           echo "| ${host} | \`${out_path}\` |" >> $GITHUB_STEP_SUMMARY
+        done
+    - name: Diff closures
+      # Since this is only triggered by pushes to main, no need to compare to main for pushes
+      if: github.event_name != 'push'
+      run: |
+        # Compare to pull_request_target or, if this has no PR-Target, main
+        target_ref="${GITHUB_BASE_REF-main}"
+        target_ref="origin/${target_ref/#refs\/heads\//}"
+        if [[ $GITHUB_REF == "target/refs/main" ]]; then
+          # If triggered on main, compare with the previous commit
+          target_ref="$(git log  HEAD~1 -1 --format=format:"%H")"
+        fi
+        echo -e "## Closure differences\n" >> $GITHUB_STEP_SUMMARY
+        echo "_Comparing current $(git rev-parse --abbrev-ref HEAD) ($(git rev-parse --verify HEAD)) to ${target_ref} ($(git rev-parse $target_ref))_" | tee -a $GITHUB_STEP_SUMMARY
+        for host in $(nix flake show . --json | jq ".nixosConfigurations|keys[]" -r); do
+          echo "::group::Diff-closures for ${host}"
+          drv="nixosConfigurations.$host.config.system.build.toplevel"
+          diff_cmd="nix store diff-closures git+file:.?ref=${target_ref}#${drv} .#${drv}"
+          # Get the nice and colorfull output for the logs, running twice won't (significantly) prolong the runtime
+          $diff_cmd
+          echo -e "<details>\n<summary>Diff for ${host}</summary>\n"  >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          # Strip color codes so that the summary stays readable
+          $diff_cmd | sed -e 's/\x1b\[[0-9;]*m//g' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo -e "\n</details>" >> $GITHUB_STEP_SUMMARY
+          echo "::endgroup::"
         done
