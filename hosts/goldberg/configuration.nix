@@ -8,6 +8,7 @@
     ../../services/vaultwarden.nix
     ../../services/dokuwiki.nix
     ../../services/freescout.nix
+    ../../services/hedgedoc.nix
   ];
 
   system.stateVersion = "23.05";
