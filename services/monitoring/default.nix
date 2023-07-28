@@ -4,7 +4,7 @@
   outputs,
   ...
 }: let
-  inherit (lib) concatStringsSep mapAttrsToList hasAttrByPath getAttrFromPath filterAttrs singleton optional;
+  inherit (lib) concatStringsSep mapAttrsToList getAttrFromPath filterAttrs singleton optional;
   inherit (lib) escapeRegex;
   inherit (config.networking) fqdn hostName;
 
@@ -52,15 +52,13 @@
   # allTargets = filterAttrs (_: c: (isMe c) || !(isDev_ c)) allHosts;
   allTargets = allHosts;
 
-  # monFqdn = config: "${config.networking.hostName}.${monDomain}";
-  hasEnabled = servicePath: config: let
-    path = servicePath ++ ["enable"];
+  monTarget = service: config: "${config.networking.hostName}.${monDomain}:${toString service.port}";
+  targetAllHosts = servicePath: let
+    service = cfg: getAttrFromPath servicePath cfg.config;
   in
-    (hasAttrByPath path config) && (getAttrFromPath path config);
-
-  monTarget = servicePath: config: let
-    port = toString (getAttrFromPath (servicePath ++ ["port"]) config);
-  in "${config.networking.hostName}.${monDomain}:${port}";
+    mapAttrsToList
+    (_: c: monTarget (service c) c.config)
+    (filterAttrs (_: c: (service c).enable or false) allTargets);
 
   dropMetrics = extraRegexen: let
     dropRegexen = [ "go_" "promhttp_metric_handler_requests_" ] ++ extraRegexen;
@@ -80,10 +78,6 @@
 
   prometheusPath = ["services" "prometheus"];
   alertmanagerPath = ["services" "prometheus" "alertmanager"];
-  targetAllHosts = servicePath:
-    mapAttrsToList
-    (_: config: monTarget servicePath config.config)
-    (filterAttrs (_: c: (hasEnabled servicePath c.config)) allTargets);
 in {
   /*
   Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
@@ -160,7 +154,7 @@ in {
 
     alertmanagers = [{
       static_configs = [{
-          targets = [(monTarget alertmanagerPath config)];
+        targets = [(monTarget config.services.prometheus.alertmanager config)];
       }];
     }];
 
@@ -170,7 +164,7 @@ in {
         static_configs = [{
           targets = [
             # Only scraping to own node-exporter
-            (monTarget ["services" "prometheus" "exporters" "node"] config)
+            (monTarget config.services.prometheus.exporters.node config)
           ];
         }];
         relabel_configs = [relabelInstance];
