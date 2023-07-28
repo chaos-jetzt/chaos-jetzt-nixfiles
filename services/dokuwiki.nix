@@ -1,10 +1,12 @@
-{
-  pkgs,
-  config,
-  lib,
-  baseDomain,
-  ...
-}: let
+{ pkgs
+, config
+, lib
+, baseDomain
+, isDev
+, ...
+}:
+
+let
   fpm_pool = "dokuwiki-${dw_domain}";
   fpm_cfg = config.services.phpfpm.pools.${fpm_pool};
   dw_domain = "wiki.${baseDomain}";
@@ -143,7 +145,7 @@ in {
       };
       plugin.oauthkeycloak = {
         key = get_secret "dokuwiki/keycloak_key";
-        openidurl = "https://sso.chaos.jetzt/auth/realms/chaos-jetzt/.well-known/openid-configuration";
+        openidurl = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/.well-known/openid-configuration";
       };
     };
 

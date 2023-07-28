@@ -57,7 +57,7 @@
       };
       defaults = { name, config, ... }: {
         deployment = {
-          tags = if name == "shirley" then [ "prod" ] else [ "dev" ];
+          tags = [ config.cj.deployment.environment ];
           targetHost = config.networking.fqdn;
           targetUser = null;
         };

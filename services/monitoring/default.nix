@@ -37,7 +37,7 @@
 
   isMe = host: host.config.networking.fqdn == fqdn;
   others = filterAttrs (_: !isMe) outputs.nixosConfigurations;
-  isDev = host: (substring 0 3 host._module.args.baseDomain) == "dev";
+  isDev = host: host._module.args.isDev;
   allHosts = outputs.nixosConfigurations // externalTargets;
   /*
     Right now we only have one non-dev host in our NixOS setup (the ansible hosts don't monitor the NixOS hosts).

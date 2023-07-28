@@ -1,5 +1,5 @@
 { pkgs, baseDomain, ... }: {
-  _module.args.baseDomain = "chaos.jetzt";
+  cj.deployment.environment = "prod";
 
   imports = [
     ./hardware-config.nix

@@ -1,4 +1,10 @@
-{ lib, pkgs, config, baseDomain, ...}:
+{ lib
+, pkgs
+, config
+, baseDomain
+, isDev
+, ...}:
+
 let
   matrixWellKnown = {
     client."m.homeserver".base_url = "https://matrix.${baseDomain}/";
@@ -6,7 +12,6 @@ let
   };
   toJSONFile = name: value: pkgs.writeText name (builtins.toJSON value);
   matrixWellKnownDir = pkgs.linkFarm "matrix-well-known" (builtins.mapAttrs toJSONFile matrixWellKnown);
-  isDev = (builtins.substring 0 3 baseDomain) == "dev";
   webroot = "${config.users.users."web-deploy".home}/public";
   deployPubKey = if isDev then
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRmpgMjXQCjA/YPNJvaNdKMjr0jnLtwKKbLCIisjeBw dev-deploykey@chaos.jetzt"
