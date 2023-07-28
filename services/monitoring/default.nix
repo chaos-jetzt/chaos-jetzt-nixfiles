@@ -4,7 +4,7 @@
   outputs,
   ...
 }: let
-  inherit (lib) concatStringsSep mapAttrsToList hasAttrByPath getAttrFromPath filterAttrs substring singleton optionalString optional;
+  inherit (lib) concatStringsSep mapAttrsToList hasAttrByPath getAttrFromPath filterAttrs singleton optional;
   inherit (lib) escapeRegex;
   inherit (config.networking) fqdn hostName;
 
@@ -12,11 +12,15 @@
   # but on which we'd like to have included in the monitoring.
   externalTargets = let
     host = hostName: {
-      _module.args.baseDomain = "chaos.jetzt";
+      _module.args = {
+        isDev = false;
+        baseDomain = "chaos.jetzt";
+      };
       config = {
-        networking = {
+        networking = rec {
           inherit hostName;
           domain = "net.chaos.jetzt";
+          fqdn = "${hostName}.${domain}";
         };
         services.prometheus = {
           enable = true;
@@ -35,16 +39,17 @@
 
   monDomain = "mon.${config.networking.domain}";
 
+  # deadnix: skip # Will be used as soon as we have two non-dev hosts
   isMe = host: host.config.networking.fqdn == fqdn;
-  others = filterAttrs (_: !isMe) outputs.nixosConfigurations;
-  isDev = host: host._module.args.isDev;
+  # deadnix: skip # Will be used as soon as we have two non-dev hosts
+  isDev_ = getAttrFromPath [ "_module" "args" "isDev" ];
   allHosts = outputs.nixosConfigurations // externalTargets;
   /*
     Right now we only have one non-dev host in our NixOS setup (the ansible hosts don't monitor the NixOS hosts).
     That's why we currently add all hosts to our little monitoring "cluster". As soon as we have two or more production hosts,
     the dev host can be taken out of the equation
   */
-  # allTargets = filterAttrs (_: c: (isMe c) || !(isDev c)) allHosts;
+  # allTargets = filterAttrs (_: c: (isMe c) || !(isDev_ c)) allHosts;
   allTargets = allHosts;
 
   # monFqdn = config: "${config.networking.hostName}.${monDomain}";
@@ -57,12 +62,12 @@
     port = toString (getAttrFromPath (servicePath ++ ["port"]) config);
   in "${config.networking.hostName}.${monDomain}:${port}";
 
-  dropMetrics = {wildcard ? true}: extraRegexen: let
+  dropMetrics = extraRegexen: let
     dropRegexen = [ "go_" "promhttp_metric_handler_requests_" ] ++ extraRegexen;
   in
     singleton {
       inherit (regex);
-      regex = "(${concatStringsSep "|" dropRegexen})${optionalString wildcard ".*"}";
+      regex = "(${concatStringsSep "|" dropRegexen}).*";
       source_labels = ["__name__"];
       action = "drop";
     };
@@ -78,7 +83,7 @@
   targetAllHosts = servicePath:
     mapAttrsToList
     (_: config: monTarget servicePath config.config)
-    (filterAttrs (_: c: (hasEnabled servicePath c.config)) (outputs.nixosConfigurations // externalTargets));
+    (filterAttrs (_: c: (hasEnabled servicePath c.config)) allTargets);
 in {
   /*
   Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
@@ -169,7 +174,7 @@ in {
           ];
         }];
         relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics {} [];
+        metric_relabel_configs = dropMetrics [];
       }
       {
         job_name = "alertmanager";
@@ -177,7 +182,7 @@ in {
           targets = targetAllHosts alertmanagerPath;
         }];
         relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics {} [
+        metric_relabel_configs = dropMetrics [
           "alertmanager_http_(response_size_bytes|request_duration_seconds)_"
           "alertmanager_notification_latency_seconds_"
           "alertmanager_(nflog|cluster)_"
@@ -190,7 +195,7 @@ in {
           targets = targetAllHosts prometheusPath;
         }];
         relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics {} [
+        metric_relabel_configs = dropMetrics [
           "prometheus_(sd|tsdb|target)_"
           "prometheus_(engine_query|rule_evaluation)_duration_"
           "prometheus_http_(response_size_bytes|request_duration_seconds)_"
