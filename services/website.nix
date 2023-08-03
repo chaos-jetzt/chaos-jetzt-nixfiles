@@ -59,6 +59,12 @@ in {
         "/.well-known/matrix/".alias =  matrixWellKnownDir + "/";
       };
     };
+
+    virtualHosts."tickets.${baseDomain}" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/".return = "307 https://tickets.chaostreff-flensburg.de/chaos.jetzt$request_uri";
+    };
   };
 
   users.users."web-deploy" = {
