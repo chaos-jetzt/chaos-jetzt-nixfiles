@@ -1,9 +1,13 @@
-{ lib, config, pkgs, baseDomain, ... }:
+{ lib
+, config
+, pkgs
+, baseDomain
+, isDev
+, ... }:
 
 let
   vwDbUser = config.users.users.vaultwarden.name;
   vwDbName = config.users.users.vaultwarden.name;
-  isDev = (builtins.substring 0 3 baseDomain) == "dev";
   isDevStr = lib.optionalString isDev;
 in {
   sops.secrets = {

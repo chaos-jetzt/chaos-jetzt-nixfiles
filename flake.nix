@@ -55,11 +55,10 @@
       meta.nixpkgs = import nixpkgs {
         system = "x86_64-linux";
       };
-      defaults = { name, ... }: {
+      defaults = { name, config, ... }: {
         deployment = {
-          tags = if name == "shirley" then [ "prod" ] else [ "dev" ];
-          # TODO: It'd probably be nice to derive that from the host-configured fqdn
-          targetHost = "${name}.net.chaos.jetzt";
+          tags = [ config.cj.deployment.environment ];
+          targetHost = config.networking.fqdn;
           targetUser = null;
         };
       };

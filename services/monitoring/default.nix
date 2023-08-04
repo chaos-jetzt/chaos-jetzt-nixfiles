@@ -4,7 +4,7 @@
   outputs,
   ...
 }: let
-  inherit (lib) concatStringsSep mapAttrsToList hasAttrByPath getAttrFromPath filterAttrs substring singleton optionalString optional;
+  inherit (lib) concatStringsSep mapAttrsToList getAttrFromPath filterAttrs singleton optional;
   inherit (lib) escapeRegex;
   inherit (config.networking) fqdn hostName;
 
@@ -12,11 +12,15 @@
   # but on which we'd like to have included in the monitoring.
   externalTargets = let
     host = hostName: {
-      _module.args.baseDomain = "chaos.jetzt";
+      _module.args = {
+        isDev = false;
+        baseDomain = "chaos.jetzt";
+      };
       config = {
-        networking = {
+        networking = rec {
           inherit hostName;
           domain = "net.chaos.jetzt";
+          fqdn = "${hostName}.${domain}";
         };
         services.prometheus = {
           enable = true;
@@ -35,34 +39,33 @@
 
   monDomain = "mon.${config.networking.domain}";
 
+  # deadnix: skip # Will be used as soon as we have two non-dev hosts
   isMe = host: host.config.networking.fqdn == fqdn;
-  others = filterAttrs (_: !isMe) outputs.nixosConfigurations;
-  isDev = host: (substring 0 3 host._module.args.baseDomain) == "dev";
+  # deadnix: skip # Will be used as soon as we have two non-dev hosts
+  isDev_ = getAttrFromPath [ "_module" "args" "isDev" ];
   allHosts = outputs.nixosConfigurations // externalTargets;
   /*
     Right now we only have one non-dev host in our NixOS setup (the ansible hosts don't monitor the NixOS hosts).
     That's why we currently add all hosts to our little monitoring "cluster". As soon as we have two or more production hosts,
     the dev host can be taken out of the equation
   */
-  # allTargets = filterAttrs (_: c: (isMe c) || !(isDev c)) allHosts;
+  # allTargets = filterAttrs (_: c: (isMe c) || !(isDev_ c)) allHosts;
   allTargets = allHosts;
 
-  # monFqdn = config: "${config.networking.hostName}.${monDomain}";
-  hasEnabled = servicePath: config: let
-    path = servicePath ++ ["enable"];
+  monTarget = service: config: "${config.networking.hostName}.${monDomain}:${toString service.port}";
+  targetAllHosts = servicePath: let
+    service = cfg: getAttrFromPath servicePath cfg.config;
   in
-    (hasAttrByPath path config) && (getAttrFromPath path config);
+    mapAttrsToList
+    (_: c: monTarget (service c) c.config)
+    (filterAttrs (_: c: (service c).enable or false) allTargets);
 
-  monTarget = servicePath: config: let
-    port = toString (getAttrFromPath (servicePath ++ ["port"]) config);
-  in "${config.networking.hostName}.${monDomain}:${port}";
-
-  dropMetrics = {wildcard ? true}: extraRegexen: let
+  dropMetrics = extraRegexen: let
     dropRegexen = [ "go_" "promhttp_metric_handler_requests_" ] ++ extraRegexen;
   in
     singleton {
       inherit (regex);
-      regex = "(${concatStringsSep "|" dropRegexen})${optionalString wildcard ".*"}";
+      regex = "(${concatStringsSep "|" dropRegexen}).*";
       source_labels = ["__name__"];
       action = "drop";
     };
@@ -75,10 +78,6 @@
 
   prometheusPath = ["services" "prometheus"];
   alertmanagerPath = ["services" "prometheus" "alertmanager"];
-  targetAllHosts = servicePath:
-    mapAttrsToList
-    (_: config: monTarget servicePath config.config)
-    (filterAttrs (_: c: (hasEnabled servicePath c.config)) (outputs.nixosConfigurations // externalTargets));
 in {
   /*
   Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
@@ -155,7 +154,7 @@ in {
 
     alertmanagers = [{
       static_configs = [{
-          targets = [(monTarget alertmanagerPath config)];
+        targets = [(monTarget config.services.prometheus.alertmanager config)];
       }];
     }];
 
@@ -165,11 +164,11 @@ in {
         static_configs = [{
           targets = [
             # Only scraping to own node-exporter
-            (monTarget ["services" "prometheus" "exporters" "node"] config)
+            (monTarget config.services.prometheus.exporters.node config)
           ];
         }];
         relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics {} [];
+        metric_relabel_configs = dropMetrics [];
       }
       {
         job_name = "alertmanager";
@@ -177,7 +176,7 @@ in {
           targets = targetAllHosts alertmanagerPath;
         }];
         relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics {} [
+        metric_relabel_configs = dropMetrics [
           "alertmanager_http_(response_size_bytes|request_duration_seconds)_"
           "alertmanager_notification_latency_seconds_"
           "alertmanager_(nflog|cluster)_"
@@ -190,7 +189,7 @@ in {
           targets = targetAllHosts prometheusPath;
         }];
         relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics {} [
+        metric_relabel_configs = dropMetrics [
           "prometheus_(sd|tsdb|target)_"
           "prometheus_(engine_query|rule_evaluation)_duration_"
           "prometheus_http_(response_size_bytes|request_duration_seconds)_"

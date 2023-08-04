@@ -6,8 +6,6 @@ NixOS configuration for the [chaos.jetzt] project. They are very much work in pr
 
 - [mumble-web](https://github.com/johni0702/mumble-web), possibly adding [mumble-web-proxy](https://github.com/johni0702/mumble-web-proxy/) on top
   - Both need to be packaged for Nix
-- [Dokuwiki](https://www.dokuwiki.org/dokuwiki)
-  - Migrate away from SSO
 - [Matrix synapse](https://github.com/matrix-org/synapse) + [element-web](https://github.com/vector-im/element-web)
   - Data migration (synapse)
   - Migrate away from SSO (synapse)
@@ -30,14 +28,13 @@ colmena build
 # Build specific host(s)
 colmena build --on host-a,host-b
 
-# Deploy all hosts in test mode (activate config but do not add it to the bootloader menu)
-colmena apply test
+# Deploy all dev hosts in test mode (activate config but do not add it to the bootloader menu)
+colmena apply --on @dev test
 
 # Deploy specific host (actiavte config and use it at the next boot (switch goal))
 colmena apply --on host-a
 
 # A VM of the host can be built using plain nix build
-
 nix build .\#nixosConfigurations.host-a.config.system.build.vmWithBootLoader
 ```
 
