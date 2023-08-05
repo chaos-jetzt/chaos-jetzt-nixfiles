@@ -26,6 +26,7 @@ jobs:
         echo Discovered the following system configs
         nix flake show . --json | jq ".nixosConfigurations|keys[]" -r
     - name: Build systems
+      id: build
       run: |
         echo "## Builds succeeded" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
@@ -43,29 +44,6 @@ jobs:
           echo "| ${host} | \`${out_path}\` |" >> $GITHUB_STEP_SUMMARY
         done
     - name: Diff closures
-      # Since this is only triggered by pushes to main, no need to compare to main for pushes
-      if: github.event_name != 'push'
-      run: |
-        # Compare to pull_request_target or, if this has no PR-Target, main
-        target_ref="${GITHUB_BASE_REF-main}"
-        target_ref="origin/${target_ref/#refs\/heads\//}"
-        if [[ $GITHUB_REF == "target/refs/main" ]]; then
-          # If triggered on main, compare with the previous commit
-          target_ref="$(git log  HEAD~1 -1 --format=format:"%H")"
-        fi
-        echo -e "## Closure differences\n" >> $GITHUB_STEP_SUMMARY
-        echo "_Comparing current $(git rev-parse --abbrev-ref HEAD) ($(git rev-parse --verify HEAD)) to ${target_ref} ($(git rev-parse $target_ref))_" | tee -a $GITHUB_STEP_SUMMARY
-        for host in $(nix flake show . --json | jq ".nixosConfigurations|keys[]" -r); do
-          echo "::group::Diff-closures for ${host}"
-          drv="nixosConfigurations.$host.config.system.build.toplevel"
-          diff_cmd="nix store diff-closures git+file:.?ref=${target_ref}#${drv} .#${drv}"
-          # Get the nice and colorfull output for the logs, running twice won't (significantly) prolong the runtime
-          $diff_cmd
-          echo -e "<details>\n<summary>Diff for ${host}</summary>\n"  >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          # Strip color codes so that the summary stays readable
-          $diff_cmd | sed -e 's/\x1b\[[0-9;]*m//g' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo -e "\n</details>" >> $GITHUB_STEP_SUMMARY
-          echo "::endgroup::"
-        done
+      # Still would like to see the changes for the non-failing hosts
+      if: ${{ success() }} || ${{ failure() }}
+      run: ./.github/scripts/diff-hosts.sh
