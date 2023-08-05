@@ -28,21 +28,32 @@ jobs:
     - name: Build systems
       id: build
       run: |
-        echo "## Builds succeeded" >> $GITHUB_STEP_SUMMARY
+        echo "## Building" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "| Host | Out path |" >> $GITHUB_STEP_SUMMARY
-        echo "| ---- | -------- |" >> $GITHUB_STEP_SUMMARY
+        echo "|     | Host | Out path |" >> $GITHUB_STEP_SUMMARY
+        echo "| --- | ---- | -------- |" >> $GITHUB_STEP_SUMMARY
+        any_failed=false
         for host in $(nix flake show . --json | jq ".nixosConfigurations|keys[]" -r); do
           echo "::group::Building ${host}"
           drv=".#nixosConfigurations.$host.config.system.build.toplevel"
           build_cmd="nix build ${drv}"
-          #cachix watch-exec chaos-jetzt-nixfiles -- $build_cmd
-          $build_cmd
+          failed=false
+          $build_cmd --show-trace || { failed=true; any_failed=true; }
           echo "::endgroup::"
-          out_path=$($build_cmd --print-out-paths)
-          echo -e "\x1b[32;1mSuccessfully built .#nixosConfigurations.${host}\x1b[0m"
-          echo "| ${host} | \`${out_path}\` |" >> $GITHUB_STEP_SUMMARY
+          if ! $failed; then
+            symbol="✅"
+            out_path=$($build_cmd --print-out-paths)
+            out_path="\`${out_path}\`"
+            echo -e "\x1b[32;1mSuccessfully built .#nixosConfigurations.${host}\x1b[0m"
+          else
+            symbol="❌"
+            out_path="_build failed_"
+            echo -e "\x1b[31;1mFailed to build .#nixosConfigurations.${host}\x1b[0m"
+          fi
+          echo "| $symbol | ${host} | ${out_path} |" >> $GITHUB_STEP_SUMMARY
         done
+        # Set return-code to 1 if any failed
+        ! $any_failed
     - name: Diff closures
       # Still would like to see the changes for the non-failing hosts
       if: ${{ success() }} || ${{ failure() }}
