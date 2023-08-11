@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+#
+debug="${ACTIONS_STEP_DEBUG-false}"
+if $debug; then
+  set -x
+else
+  set +x
+fi
 
 # host_exists(flake, host)
 # Checks if ${flake}#nixosConfigurations.$host
@@ -27,7 +34,7 @@ step_summary="${GITHUB_STEP_SUMMARY-/dev/null}"
 
 before_ref="${GITHUB_BASE_REF-main}"
 before_ref="origin/${before_ref/#refs\/heads\//}"
-if [[ $GITHUB_REF == "target/refs/main" ]]; then
+if [[ $GITHUB_REF == "target/refs/main" ]] || [[ $GITHUB_REF == "refs/heads/main" ]] || [[ $before_ref == "origin/" ]]; then
     # If triggered on main, compare with the previous commit
     before_ref="$(git log  HEAD~1 -1 --format=format:"%H")"
 fi
