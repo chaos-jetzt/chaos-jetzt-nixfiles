@@ -39,18 +39,10 @@
 
   monDomain = "mon.${config.networking.domain}";
 
-  # deadnix: skip # Will be used as soon as we have two non-dev hosts
   isMe = host: host.config.networking.fqdn == fqdn;
-  # deadnix: skip # Will be used as soon as we have two non-dev hosts
   isDev_ = getAttrFromPath [ "_module" "args" "isDev" ];
   allHosts = outputs.nixosConfigurations // externalTargets;
-  /*
-    Right now we only have one non-dev host in our NixOS setup (the ansible hosts don't monitor the NixOS hosts).
-    That's why we currently add all hosts to our little monitoring "cluster". As soon as we have two or more production hosts,
-    the dev host can be taken out of the equation
-  */
-  # allTargets = filterAttrs (_: c: (isMe c) || !(isDev_ c)) allHosts;
-  allTargets = allHosts;
+  allTargets = filterAttrs (_: c: (isMe c) || !(isDev_ c)) allHosts;
 
   monTarget = service: config: "${config.networking.hostName}.${monDomain}:${toString service.port}";
   targetAllHosts = servicePath: let
