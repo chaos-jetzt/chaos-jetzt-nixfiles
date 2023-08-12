@@ -148,9 +148,10 @@ final: prev:
 
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [(
     pfinal: pprev: {
-      matrix-synapse-saml-mapper = pfinal.buildPythonPackage {
+      matrix-synapse-saml-mapper = pfinal.buildPythonPackage rec {
         pname = "matrix-synapse-saml-mapper";
         version = "2020-09-21";
+        SETUPTOOLS_SCM_PRETEND_VERSION = "0.1+chaos.jetzt.${builtins.substring 0 6 src.rev}.d${builtins.replaceStrings ["-"] [""] version}";
 
         postPatch = ''
           substituteInPlace setup.py \
@@ -161,13 +162,11 @@ final: prev:
           owner = "chaos-jetzt";
           repo = "matrix-synapse-saml-mapper";
           rev = "1aca2bfc73568a1a25d4e63a52b7a8ea9bdb7272";
-          hash = "sha256-mieJ8ECYr0hiniMHSnEbQAi/W9x1lsAMqV12qHtql5E=";
-          leaveDotGit = true;
+          hash = "sha256-s2AQ92VQOXg7lxjWZKsM5h+4IWnsnLRbOC2mAmr1nZo=";
         };
 
         nativeBuildInputs = with pfinal; [
           setuptools-scm
-          final.git
         ];
         propagatedBuildInputs = with pfinal; [
           pysaml2
