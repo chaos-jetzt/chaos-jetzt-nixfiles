@@ -97,7 +97,8 @@ in {
     };
   };
 
-  services.nginx.virtualHosts."${fqdn}" = let
+  services.nginx.enable = lib.mkDefault true;
+  services.nginx.virtualHosts."${fqdn}" =  let
     monitoring_htpasswd = config.sops.secrets."monitoring.htpasswd".path;
   in {
     enableACME = true;
