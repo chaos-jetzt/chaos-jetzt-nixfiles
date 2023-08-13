@@ -33,7 +33,9 @@ in {
       email = false;
       path = sock_path;
       protocolUseSSL = true;
-      oauth2 = {
+      # NOTE(@e1mo): Currently disabled until we decide if we want
+      # SSO but left in here as this is a known working config.
+      oauth2 = lib.mkIf false {
         baseURL = sso_url;
         userProfileURL = "${sso_url}/userinfo";
         userProfileUsernameAttr = "preferred_username";
