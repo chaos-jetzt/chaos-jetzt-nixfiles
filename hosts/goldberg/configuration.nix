@@ -8,6 +8,7 @@
     ../../services/vaultwarden.nix
     ../../services/dokuwiki.nix
     ../../services/freescout.nix
+    ../../services/keycloak
   ];
 
   system.stateVersion = "23.05";
