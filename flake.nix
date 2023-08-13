@@ -42,6 +42,12 @@
           ./hosts/shirley/configuration.nix
         ];
       };
+      hamilton = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = defaultModules ++ [
+          ./hosts/hamilton/configuration.nix
+        ];
+      };
       goldberg = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = defaultModules ++ [
