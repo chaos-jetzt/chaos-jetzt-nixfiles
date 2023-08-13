@@ -145,7 +145,7 @@ in {
       };
       plugin.oauthkeycloak = {
         key = get_secret "dokuwiki/keycloak_key";
-        openidurl = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/.well-known/openid-configuration";
+        openidurl = "https://sso${lib.optionalString isDev ".dev"}.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/.well-known/openid-configuration";
       };
     };
 
