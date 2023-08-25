@@ -1,10 +1,11 @@
-{
-  config,
-  lib,
-  outputs,
-  ...
-}: let
-  inherit (lib) concatStringsSep mapAttrsToList getAttrFromPath filterAttrs singleton optional;
+{ config
+, lib
+, outputs
+, ...
+}:
+
+let
+  inherit (lib) concatStringsSep mapAttrsToList getAttrFromPath filterAttrs singleton optional hasAttrByPath;
   inherit (lib) escapeRegex;
   inherit (config.networking) fqdn hostName;
 
@@ -17,6 +18,7 @@
         baseDomain = "chaos.jetzt";
       };
       config = {
+        cj.deployment.environment = "prod";
         networking = rec {
           inherit hostName;
           domain = "net.chaos.jetzt";
@@ -28,6 +30,10 @@
           alertmanager = {
             enable = true;
             port = 9093;
+          };
+          exporters.node = {
+            enable = true;
+            port = 9100;
           };
         };
       };
@@ -69,12 +75,12 @@
     singleton {
       inherit (regex);
       regex = "(${concatStringsSep "|" dropRegexen}).*";
-      source_labels = ["__name__"];
+      source_labels = [ "__name__" ];
       action = "drop";
     };
 
   relabelInstance = {
-    source_labels = ["__address__"];
+    source_labels = [ "__address__" ];
     regex = "(\\w+)\\.${escapeRegex monDomain}\\:\\d*";
     target_label = "instance";
   };
@@ -84,10 +90,10 @@
   nodeExporterPath = [ "services" "prometheus" "exporters" "node" ];
 in {
   /*
-  Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
+    Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
 
-  1. Use `htpasswd` (from the `apacheHttpd` package) to generate the hashed password
-  2. `sops secrets/all/monitoring.htpasswd` and replace/add the specfic lines
+    1. Use `htpasswd` (from the `apacheHttpd` package) to generate the hashed password
+    2. `sops secrets/all/monitoring.htpasswd` and replace/add the specfic lines
   */
   sops.secrets = {
     "monitoring.htpasswd" = {
@@ -102,7 +108,7 @@ in {
   };
 
   services.nginx.enable = lib.mkDefault true;
-  services.nginx.virtualHosts."${fqdn}" =  let
+  services.nginx.virtualHosts."${fqdn}" = let
     monitoring_htpasswd = config.sops.secrets."monitoring.htpasswd".path;
   in {
     enableACME = true;
@@ -119,7 +125,7 @@ in {
 
   services.prometheus.exporters.node = {
     enable = true;
-    enabledCollectors = ["systemd"];
+    enabledCollectors = [ "systemd" ];
     # They either don't apply to us or will provide us with metrics not usefull to us
     disabledCollectors = [
       "arp"
@@ -233,26 +239,26 @@ in {
       route = {
         receiver = "mail";
         repeat_interval = "16h";
-        group_wait = "1m";
-        group_by = ["alertname" "instance"];
+        group_wait = "2m";
+        group_by = [ "alertname" "instance" ];
         routes = [
           {
-            match.severiy = "critical";
+            match.serverity = "critical";
             receiver = "mail";
             repeat_interval = "6h";
           }
           {
-            match.severiy = "error";
+            match.serverity = "error";
             receiver = "mail";
             repeat_interval = "16h";
           }
           {
-            match.severiy = "warn";
+            match.serverity = "warn";
             receiver = "mail";
             repeat_interval = "28h";
           }
           {
-            match.severiy = "info";
+            match.serverity = "info";
             receiver = "mail";
             repeat_interval = "56h";
           }
@@ -261,24 +267,24 @@ in {
 
       inhibit_rules = [
         {
-          target_matchers = ["alertname = ReducedAvailableMemory"];
-          source_matchers = ["alertname =~ (Very)LowAvailableMemory"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = ReducedAvailableMemory" ];
+          source_matchers = [ "alertname =~ (Very)LowAvailableMemory" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = LowAvailableMemory"];
-          source_matchers = ["alertname = VeryLowAvailableMemory"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = LowAvailableMemory" ];
+          source_matchers = [ "alertname = VeryLowAvailableMemory" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = ElevatedLoad"];
-          source_matchers = ["alertname =~ (Very)HighLoad"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = ElevatedLoad" ];
+          source_matchers = [ "alertname =~ (Very)HighLoad" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = HighLoad"];
-          source_matchers = ["alertname = VeryHighLoad"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = HighLoad" ];
+          source_matchers = [ "alertname = VeryHighLoad" ];
+          equal = [ "instance" ];
         }
       ];
     };
