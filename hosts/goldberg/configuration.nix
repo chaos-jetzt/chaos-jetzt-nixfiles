@@ -1,5 +1,8 @@
 { lib, pkgs, config, ... }: {
   cj.deployment.environment = "dev";
+  cj.monitoring = {
+    interface = "ens10";
+  };
 
   imports = [
     ./hardware-config.nix

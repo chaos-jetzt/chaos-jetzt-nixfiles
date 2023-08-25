@@ -1,5 +1,8 @@
 { pkgs, config, ... }: {
   cj.deployment.environment = "prod";
+  cj.monitoring = {
+    interface = "ens10";
+  };
 
   imports = [
     ./hardware-config.nix

@@ -8,11 +8,6 @@
   inherit (lib) escapeRegex;
   inherit (config.networking) fqdn hostName;
 
-  # Absolute hack until https://github.com/chaos-jetzt/chaos-jetzt-nixfiles/pull/29 is merged
-  # But needed for us to have a working monitoring on our main matrix server (kinda important)
-  # FIXME: Remove when #29 is merged
-  monIf = if config.networking.hostName == "hamilton" then "enp7s0" else "ens10";
-
   # Basically a manual list of (legacy) hosts not yet migrated to NixOS
   # but on which we'd like to have included in the monitoring.
   externalTargets = let
@@ -129,7 +124,7 @@ in {
     ];
   };
 
-  networking.firewall.interfaces.${monIf}.allowedTCPPorts = let
+  networking.firewall.interfaces.${config.cj.monitoring.interface}.allowedTCPPorts = let
     inherit (config.services) prometheus;
     ifEnabled = x: lib.optional x.enable x.port;
   in (
