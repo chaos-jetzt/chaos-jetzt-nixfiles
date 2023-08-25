@@ -22,6 +22,10 @@ in
       description = "Interface the monitoring network is attached";
       type = types.str;
     };
+    ip = mkOption {
+      description = "Hosts IP in the monitoring network";
+      type = types.str;
+    };
   };
 
   config = {

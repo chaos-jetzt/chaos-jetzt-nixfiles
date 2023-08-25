@@ -2,6 +2,7 @@
   cj.deployment.environment = "dev";
   cj.monitoring = {
     interface = "ens10";
+    ip = "172.16.0.5";
   };
 
   imports = [

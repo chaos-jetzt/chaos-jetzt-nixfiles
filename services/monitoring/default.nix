@@ -41,16 +41,27 @@
 
   isMe = host: host.config.networking.fqdn == fqdn;
   isDev_ = getAttrFromPath [ "_module" "args" "isDev" ];
+  # Only alertmanagers from our NixOS config should be part of the cluster
+  isNixos = hasAttrByPath [ "config" "system" "nixos" "release" ];
   allHosts = outputs.nixosConfigurations // externalTargets;
-  allTargets = filterAttrs (_: c: (isMe c) || !(isDev_ c)) allHosts;
+  allTargets = { withSelf ? true, withDev ? true, onlyNixos ? false }:
+    filterAttrs (_: c: ((withSelf || !(isMe c)) || (withDev || !(isDev_ c))) && (!onlyNixos || isNixos c)) allHosts;
 
   monTarget = service: config: "${config.networking.hostName}.${monDomain}:${toString service.port}";
-  targetAllHosts = servicePath: let
+  targetAllHosts = targets: servicePath: let
     service = cfg: getAttrFromPath servicePath cfg.config;
   in
-    mapAttrsToList
-    (_: c: monTarget (service c) c.config)
-    (filterAttrs (_: c: (service c).enable or false) allTargets);
+    map (c: monTarget (service c) c.config) (builtins.filter (c: (service c).enable or false) targets);
+
+  # Extracting this into a separate function so that we can easily group based on environment
+  # for all scrape targets whilst only needing to build the differentiation logic one.
+  # This creates scrape configs where each hosts gets a label of `environment` assigned
+  allStaticConfigs = filter: servicePath: let
+    groups = builtins.groupBy (h: h.config.cj.deployment.environment) (mapAttrsToList (_: value: value) (allTargets filter));
+  in mapAttrsToList (env: hosts: {
+      targets = targetAllHosts hosts servicePath;
+      labels.environment = env;
+    }) groups;
 
   dropMetrics = extraRegexen: let
     dropRegexen = [ "go_" "promhttp_metric_handler_requests_" ] ++ extraRegexen;
@@ -68,8 +79,9 @@
     target_label = "instance";
   };
 
-  prometheusPath = ["services" "prometheus"];
-  alertmanagerPath = ["services" "prometheus" "alertmanager"];
+  prometheusPath = [ "services" "prometheus" ];
+  alertmanagerPath = [ "services" "prometheus" "alertmanager" ];
+  nodeExporterPath = [ "services" "prometheus" "exporters" "node" ];
 in {
   /*
   Steps to edit the monitoring.htpasswd (aka. adding yourself / updating you password):
@@ -128,10 +140,12 @@ in {
     inherit (config.services) prometheus;
     ifEnabled = x: lib.optional x.enable x.port;
   in (
-    (ifEnabled prometheus)
-    ++ (ifEnabled prometheus.alertmanager)
-    ++ (ifEnabled prometheus.exporters.node)
-  );
+      (ifEnabled prometheus)
+      ++ (ifEnabled prometheus.alertmanager)
+      # Alertmanager cluster port (not configurable in NixOS)
+      ++ lib.optional prometheus.alertmanager.enable 9094
+      ++ (ifEnabled prometheus.exporters.node)
+    );
 
   services.prometheus = {
     enable = true;
@@ -146,29 +160,22 @@ in {
     retentionTime = "30d";
 
     alertmanagers = [{
-      static_configs = [{
-        targets = [(monTarget config.services.prometheus.alertmanager config)];
-      }];
+      # Even in a cluster, alerts should be sent to each and every alertmanager
+      # See https://prometheus.io/docs/alerting/latest/alertmanager/#high-availability
+      static_configs = allStaticConfigs { onlyNixos = true; } alertmanagerPath;
     }];
 
     scrapeConfigs = [
       {
         job_name = "node";
-        static_configs = [{
-          targets = [
-            # Only scraping to own node-exporter
-            (monTarget config.services.prometheus.exporters.node config)
-          ];
-        }];
-        relabel_configs = [relabelInstance];
-        metric_relabel_configs = dropMetrics [];
+        static_configs = allStaticConfigs { } nodeExporterPath;
+        relabel_configs = [ relabelInstance ];
+        metric_relabel_configs = dropMetrics [ ];
       }
       {
         job_name = "alertmanager";
-        static_configs = [{
-          targets = targetAllHosts alertmanagerPath;
-        }];
-        relabel_configs = [relabelInstance];
+        static_configs = allStaticConfigs { } alertmanagerPath;
+        relabel_configs = [ relabelInstance ];
         metric_relabel_configs = dropMetrics [
           "alertmanager_http_(response_size_bytes|request_duration_seconds)_"
           "alertmanager_notification_latency_seconds_"
@@ -178,10 +185,8 @@ in {
       }
       {
         job_name = "prometheus";
-        static_configs = [{
-          targets = targetAllHosts prometheusPath;
-        }];
-        relabel_configs = [relabelInstance];
+        static_configs = allStaticConfigs { } prometheusPath;
+        relabel_configs = [ relabelInstance ];
         metric_relabel_configs = dropMetrics [
           "prometheus_(sd|tsdb|target)_"
           "prometheus_(engine_query|rule_evaluation)_duration_"
@@ -194,13 +199,21 @@ in {
 
   services.prometheus.alertmanager = {
     enable = true;
-    extraFlags = ["--web.route-prefix=\"/\"" "--cluster.listen-address="];
+    # Automatic peer detection is not working, possibly because hetzner networks
+    # are just a routed network and don't emulate anything layer 2
+    clusterPeers = mapAttrsToList (_: config: "${config.config.networking.hostName}.${monDomain}") (allTargets { onlyNixos = true; });
+    extraFlags = [
+      "--web.route-prefix=\"/\""
+      "--cluster.advertise-address=\"${config.cj.monitoring.ip}:9094\""
+      "--cluster.pushpull-interval=30s"
+      "--cluster.settle-timeout=30s"
+    ];
     webExternalUrl = "https://${fqdn}/alertmanager/";
     environmentFile = config.sops.secrets."alertmanager/env".path;
 
     configuration = {
       global = {
-        smtp_from = "Chaos-Jetzt Monitoring (${hostName}) <monitoring-${hostName}@chaos.jetzt>";
+        smtp_from = "chaos.jetzt Monitoring <monitoring-${hostName}@chaos.jetzt>";
         smtp_smarthost = "\${SMTP_HOST}:587";
         smtp_auth_username = "\${SMTP_USER}";
         smtp_auth_password = "\${SMTP_PASS}";
