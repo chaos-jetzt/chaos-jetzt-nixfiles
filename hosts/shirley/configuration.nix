@@ -1,4 +1,4 @@
-{ pkgs, baseDomain, ... }: {
+{ pkgs, config, ... }: {
   cj.deployment.environment = "prod";
 
   imports = [

@@ -145,4 +145,42 @@ final: prev:
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
   };
+
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [(
+    pfinal: pprev: {
+      matrix-synapse-saml-mapper = pfinal.buildPythonPackage rec {
+        pname = "matrix-synapse-saml-mapper";
+        version = "2020-09-21";
+        SETUPTOOLS_SCM_PRETEND_VERSION = "0.1+chaos.jetzt.${builtins.substring 0 6 src.rev}.d${builtins.replaceStrings ["-"] [""] version}";
+
+        postPatch = ''
+          substituteInPlace setup.py \
+            --replace "attr>=0.3.1" "attrs"
+        '';
+
+        src = final.fetchFromGitHub {
+          owner = "chaos-jetzt";
+          repo = "matrix-synapse-saml-mapper";
+          rev = "1aca2bfc73568a1a25d4e63a52b7a8ea9bdb7272";
+          hash = "sha256-s2AQ92VQOXg7lxjWZKsM5h+4IWnsnLRbOC2mAmr1nZo=";
+        };
+
+        # This is absolutely ugly and not nice
+        # In theory python should pick up the res as data files (manual bdist_wheel does manage to do so)
+        # but somehow this isn't the case with buildPythonPackage
+        # FIXME: Make this something more robus and "propper"
+        postInstall = ''
+          cp -ar $src/matrix_synapse_saml_mapper/res $out/lib/python*/site-packages/*/
+        '';
+
+        nativeBuildInputs = with pfinal; [
+          setuptools-scm
+        ];
+        propagatedBuildInputs = with pfinal; [
+          pysaml2
+          attrs
+          final.matrix-synapse-unwrapped
+        ];
+      };
+  })];
 }
