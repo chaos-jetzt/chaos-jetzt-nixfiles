@@ -43,9 +43,15 @@ in {
       '';
       # Forward all Matrix API calls to the synapse Matrix homeserver. A trailing slash
       # *must not* be used here.
-      locations."/_matrix".proxyPass = "http://[::1]:${toString matrixPort}";
+      locations."/_matrix" = {
+        proxyPass = "http://[::1]:${toString matrixPort}";
+        recommendedProxySettings = true;
+      };
       # Forward requests for e.g. SSO and password-resets.
-      locations."/_synapse/client".proxyPass = "http://[::1]:${toString matrixPort}";
+      locations."/_synapse/client" = {
+        proxyPass = "http://[::1]:${toString matrixPort}";
+        recommendedProxySettings = true;
+      };
       # # Allow public access to the synapse admin API
       # # The docs advise against leaving this open to just everyone. That's why this currently is commented out
       # # if admin things need to be done, it's required to SSH to the server and then direct all admin requests to
