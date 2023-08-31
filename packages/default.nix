@@ -171,7 +171,7 @@ final: prev:
         propagatedBuildInputs = with pfinal; [
           pysaml2
           attrs
-          final.matrix-synapse
+          final.matrix-synapse-unwrapped
         ];
       };
   })];
