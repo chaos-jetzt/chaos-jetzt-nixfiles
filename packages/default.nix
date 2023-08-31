@@ -165,6 +165,14 @@ final: prev:
           hash = "sha256-s2AQ92VQOXg7lxjWZKsM5h+4IWnsnLRbOC2mAmr1nZo=";
         };
 
+        # This is absolutely ugly and not nice
+        # In theory python should pick up the res as data files (manual bdist_wheel does manage to do so)
+        # but somehow this isn't the case with buildPythonPackage
+        # FIXME: Make this something more robus and "propper"
+        postInstall = ''
+          cp -ar $src/matrix_synapse_saml_mapper/res $out/lib/python*/site-packages/*/
+        '';
+
         nativeBuildInputs = with pfinal; [
           setuptools-scm
         ];
