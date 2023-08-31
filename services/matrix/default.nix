@@ -46,6 +46,12 @@ in {
       locations."/_matrix".proxyPass = "http://[::1]:${toString matrixPort}";
       # Forward requests for e.g. SSO and password-resets.
       locations."/_synapse/client".proxyPass = "http://[::1]:${toString matrixPort}";
+      # # Allow public access to the synapse admin API
+      # # The docs advise against leaving this open to just everyone. That's why this currently is commented out
+      # # if admin things need to be done, it's required to SSH to the server and then direct all admin requests to
+      # # localhost:8008/_synapse/admin
+      # # Leaving that in here for when I (e1mo) wonder why calls to the admin API don't work in the future
+      # locations."/_synapse/admin".proxyPass = "http://[::1]:${toString matrixPort}";
     };
   };
 
@@ -102,7 +108,7 @@ in {
         "fe80::/64"
         "fc00::/7"
       ];
-      
+
       admin_contact = "mailto:administration@chaos.jetzt";
       url_preview_enabled = true;
       media_store_path = "/mnt/synapse_media_store";
