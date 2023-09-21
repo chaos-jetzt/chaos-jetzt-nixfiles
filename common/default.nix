@@ -88,4 +88,10 @@
     #  ## ##  #
     # ####### #
   '';
+
+  services.journald.extraConfig = ''
+    SystemMaxUse=2G
+    SystemKeepFree=1G
+    MaxRetentionSec=14d
+  '';
 }
