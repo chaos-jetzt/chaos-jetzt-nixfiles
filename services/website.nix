@@ -8,6 +8,7 @@
 let
   matrixWellKnown = {
     client."m.homeserver".base_url = "https://matrix.${baseDomain}/";
+    client."org.matrix.msc3575.proxy".url = "https://sync.matrix.${baseDomain}";
     server."m.server" = "matrix.${baseDomain}:443";
   };
   toJSONFile = name: value: pkgs.writeText name (builtins.toJSON value);

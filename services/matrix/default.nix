@@ -13,6 +13,7 @@ in {
     };
     "synapse/secret_config".owner = "matrix-synapse";
     "synapse/registration_shared_secret".owner = "matrix-synapse";
+    "sliding-sync-env" = {};
   };
 
   services.nginx.virtualHosts = {
@@ -47,6 +48,12 @@ in {
         proxyPass = "http://[::1]:${toString matrixPort}";
         recommendedProxySettings = true;
       };
+      # Forward all Matrix API calls to the synapse Matrix homeserver. A trailing slash
+      # *must not* be used here.
+      locations."/_client" = {
+        proxyPass = "http://[::1]:${toString matrixPort}";
+        recommendedProxySettings = true;
+      };
       # Forward requests for e.g. SSO and password-resets.
       locations."/_synapse/client" = {
         proxyPass = "http://[::1]:${toString matrixPort}";
@@ -58,6 +65,11 @@ in {
       # # localhost:8008/_synapse/admin
       # # Leaving that in here for when I (e1mo) wonder why calls to the admin API don't work in the future
       # locations."/_synapse/admin".proxyPass = "http://[::1]:${toString matrixPort}";
+    };
+    "sync.matrix.${baseDomain}" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/".proxyPass = "http://[::1]:8009";
     };
   };
 
@@ -175,5 +187,17 @@ in {
   systemd.services.matrix-synapse = {
     unitConfig.RequiresMountsFor = [ config.services.matrix-synapse.settings.media_store_path ];
     serviceConfig.ReadWritePaths = [ config.services.matrix-synapse.settings.media_store_path ];
+  };
+
+  services.matrix-synapse.sliding-sync = {
+    enable = true;
+    createDatabase = true;
+    environmentFile = config.sops.secrets."sliding-sync-env".path;
+    settings = {
+      SYNCV3_SERVER = "https://matrix.${baseDomain}";
+      SYNCV3_LOG_LEVEL = "info";
+      SYNCV3_BINDADDR = "[::1]:8009";
+      SYNCV3_PROM = ":2112";
+    };
   };
 }
