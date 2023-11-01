@@ -8,7 +8,7 @@
 
   users.mutableUsers = false;
   users.users = {
-    root.passwordFile = config.sops.secrets."root_user_password".path;
+    root.hashedPasswordFile = config.sops.secrets."root_user_password".path;
     e1mo = {
       isNormalUser = true;
       extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
