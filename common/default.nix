@@ -57,6 +57,7 @@
   # That way we can't forget to disable the access logs for each individual website
   services.nginx.appendHttpConfig = ''
     access_log off;
+    log_not_found off;
   '';
   security.acme = {
     acceptTerms = true;
