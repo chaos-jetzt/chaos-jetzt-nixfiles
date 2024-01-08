@@ -25,9 +25,7 @@ in {
     ensureDatabases = [ vwDbName ];
     ensureUsers = [{
       name = vwDbUser;
-      ensurePermissions = {
-        "DATABASE ${vwDbName}" = "ALL PRIVILEGES";
-      };
+      ensureDBOwnership = true;
     }];
   };
 
