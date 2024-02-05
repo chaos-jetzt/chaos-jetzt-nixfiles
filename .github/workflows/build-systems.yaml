@@ -58,3 +58,6 @@ jobs:
       # Still would like to see the changes for the non-failing hosts
       if: ${{ success() }} || ${{ failure() }}
       run: ./.github/scripts/diff-hosts.sh
+    - name: Colmena build
+      # This should not cause additional builds. But try to run this command to avoid problems with out colmena configuration
+      run: nix run .#colmena build
