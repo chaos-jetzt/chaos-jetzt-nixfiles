@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+  schedule:
+    # Build twice a week to ensure that the cache is always primed
+    - cron: '42 23 * * 1,5'
 
 jobs:
   build:
