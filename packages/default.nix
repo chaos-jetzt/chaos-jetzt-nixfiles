@@ -28,24 +28,24 @@ final: prev:
     tag = final.stdenv.mkDerivation rec {
       name = "tag";
       pname = "dokuwiki-plugin-tag";
-      version = "2023-05-25";
+      version = "2023-10-17";
       src = final.fetchFromGitHub {
         owner = "dokufreaks";
         repo = "plugin-tag";
         rev = version;
-        hash = "sha256-HipMbLK6LSdBfHGW03ekLp3Rvh2JQbAPyVIRRHug4GU=";
+        hash = "sha256-W6p+t2pdThypazx58UsmBvjXovRHage+TdDPrsidXJc=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
     pagelist = final.stdenv.mkDerivation rec {
       name = "pagelist";
       pname = "dokuwiki-plugin-pagelist";
-      version = "2022-09-28";
+      version = "2023-08-27";
       src = final.fetchFromGitHub {
         owner = "dokufreaks";
         repo = "plugin-pagelist";
         rev = version;
-        hash = "sha256-IzedBYePVTS6jzWZeORpebsZiRgrnP+57t9mstQWnMQ=";
+        hash = "sha256-EHOpghE6ou1sdlGj6zIzRGAVCcwADteQeBW8adwBHpo=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
@@ -64,12 +64,12 @@ final: prev:
     nspages = final.stdenv.mkDerivation {
       name = "nspages";
       pname = "dokuwiki-plugin-nspages";
-      version = "2023-05-29";
+      version = "2024-01-04";
       src = final.fetchFromGitHub {
         owner = "gturri";
         repo = "nspages";
-        rev = "8763b40b3e9c79042055135e7c157aeaed5c078b";
-        hash = "sha256-Fa8gtImR8tP8Vnhys9rZdtxl8Ii8cfrXZsTFNC0sD3w=";
+        rev = "035c029bf43ef7f6418dd651bbdd23f347fe4ec0";
+        hash = "sha256-n5bOM7J4IFGKTYcicdXNtnjTWAAbjIvxWJWAMezbsDU=";
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
