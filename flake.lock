@@ -27,11 +27,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1692954414,
-        "narHash": "sha256-rl1g3aGG0Nlmae7DCGqvOe+yQAcqTGUxehcMAk6usWQ=",
+        "lastModified": 1708021734,
+        "narHash": "sha256-ujfb6a+X8ZDOMyH2W9t37zjOXbg6uZieMG6XjHRoS68=",
         "ref": "main",
-        "rev": "1594009c5040acd2d0c6b8700ca2cc64808041c4",
-        "revCount": 23,
+        "rev": "47281675af48d204db161add5c4f4b1c93a71425",
+        "revCount": 24,
         "type": "git",
         "url": "https://cyberchaos.dev/e1mo/freescout-nix-flake"
       },
