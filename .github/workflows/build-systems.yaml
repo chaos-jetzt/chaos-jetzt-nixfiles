@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+  schedule:
+    # Build twice a week to ensure that the cache is always primed
+    - cron: '42 23 * * 1,5'
 
 jobs:
   build:
@@ -58,3 +61,6 @@ jobs:
       # Still would like to see the changes for the non-failing hosts
       if: ${{ success() }} || ${{ failure() }}
       run: ./.github/scripts/diff-hosts.sh
+    - name: Colmena build
+      # This should not cause additional builds. But try to run this command to avoid problems with out colmena configuration
+      run: nix run .#colmena build

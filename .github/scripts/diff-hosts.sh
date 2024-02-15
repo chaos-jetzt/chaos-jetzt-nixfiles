@@ -41,14 +41,18 @@ fi
 
 before_rev="$(git rev-parse "$before_ref")"
 before_rev_abbr="$before_ref"
-before_flake="git+file:.?ref=${before_rev}"
+# Relative flake git flake urls don't work (right now?) because git treats the path as absolute
+before_flake="git+file://$(pwd)?rev=${before_rev}"
 
 after_rev="$(git rev-parse --verify HEAD)"
 after_rev_abbr="$(git rev-parse --abbrev-ref HEAD)"
 if [[ -z $(git status --short) ]]; then
     # If the working tree is clean, we can use the latest commit hash directly
     # and thus profit from even more reduced build times
-    after_flake="git+file:.?ref=${after_rev}"
+
+    # Somehow this doesn't work (anymore??)
+    after_flake="git+file://$(pwd)?rev=${after_rev}"
+    after_flake="."
 else
     # That way the script can be used to check local (non commited) changes
     after_flake="."
@@ -107,9 +111,10 @@ for host in "${all_hosts[@]}"; do
             {
                 echo '```';
                 $diff_cmd --show-trace | sed -e 's/\x1b\[[0-9;]*m//g';
+                echo "";
                 echo '```';
                 echo -e "\n</details>\n";
-            } >> "$step_summary" 2>&1
+            } >> "$step_summary"
         else
             echo -e "**${host}** has not changed\n" | tee -a "$step_summary"
         fi
