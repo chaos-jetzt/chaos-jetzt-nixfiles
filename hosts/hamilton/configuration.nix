@@ -1,5 +1,9 @@
 { pkgs, baseDomain, config, ... }: {
   cj.deployment.environment = "prod";
+  cj.monitoring = {
+    interface = "enp7s0";
+    ip = "172.16.0.6";
+  };
 
   imports = [
     ./hardware-config.nix
