@@ -15,12 +15,14 @@ in {
     "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
-  services.nginx.virtualHosts = {
-    "chat.${baseDomain}" = {
-      enableACME = true;
-      forceSSL = true;
+  services.nginx = {
+    recommendedProxySettings = true;
+    virtualHosts = {
+      "chat.${baseDomain}" = {
+        enableACME = true;
+        forceSSL = true;
 
-      root = pkgs.element-web.override {
+        root = pkgs.element-web.override {
         # Somewhat duplicate of the stuff in website.nix but I am
         # not sure if we absolutely need to dedup this, just out of complexity perspective
         conf = {
@@ -60,6 +62,7 @@ in {
       # locations."/_synapse/admin".proxyPass = "http://[::1]:${toString matrixPort}";
     };
   };
+};
 
   services.postgresql = {
     enable = true;
