@@ -89,7 +89,6 @@ in {
     static-auth-secret-file = config.sops.secrets."coturn_static_auth_secret".path;
   };
 
-  # TODO: Use media storage volume on prod
   services.matrix-synapse = {
     enable = true;
     plugins = [
@@ -147,6 +146,12 @@ in {
         user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
       };
       password_config.enabled = false;
+      media_retention = {
+        # Since clearing remote media does the trick for now when it comes to purging old media
+        # keeping local media for virtually unlimited time (for now, may change in the future).
+        local_media_lifetime = "10y";
+        remote_media_lifetime = "90d";
+      };
     };
     extraConfigFiles = let
       format = (pkgs.formats.yaml {}).generate;
