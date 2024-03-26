@@ -10,6 +10,7 @@
     ../../services/dokuwiki.nix
     ../../services/freescout.nix
     ../../services/hedgedoc.nix
+    ../../services/pretix.nix
   ];
 
   system.stateVersion = "23.05";
