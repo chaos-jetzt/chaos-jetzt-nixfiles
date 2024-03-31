@@ -92,7 +92,7 @@ groups:
           summary: "Elevated load15 on {{ $labels.instance }}"
 
       - alert: LowFreeDiskSpace
-        expr:  node_filesystem_readonly == 0 and ON (instance, device, mountpoint) (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 15
+        expr:  ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 15) and on (instance, device, mountpoint)  node_filesystem_readonly == 0
         for: 10m
         labels:
           serverity: info
@@ -100,7 +100,7 @@ groups:
           summary: "{{ $labels.mountpoint }} on {{ $labels.instance }} has less than 15% space left"
 
       - alert: VeryLowFreeDiskSpace
-        expr:  node_filesystem_readonly == 0 and ON (instance, device, mountpoint) (node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 5
+        expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 5) and ON (instance, device, mountpoint) node_filesystem_readonly == 0
         for: 3m
         labels:
           serverity: error
