@@ -15,12 +15,14 @@ in {
     "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
-  services.nginx.virtualHosts = {
-    "chat.${baseDomain}" = {
-      enableACME = true;
-      forceSSL = true;
+  services.nginx = {
+    recommendedProxySettings = true;
+    virtualHosts = {
+      "chat.${baseDomain}" = {
+        enableACME = true;
+        forceSSL = true;
 
-      root = pkgs.element-web.override {
+        root = pkgs.element-web.override {
         # Somewhat duplicate of the stuff in website.nix but I am
         # not sure if we absolutely need to dedup this, just out of complexity perspective
         conf = {
@@ -60,6 +62,7 @@ in {
       # locations."/_synapse/admin".proxyPass = "http://[::1]:${toString matrixPort}";
     };
   };
+};
 
   services.postgresql = {
     enable = true;
@@ -86,7 +89,6 @@ in {
     static-auth-secret-file = config.sops.secrets."coturn_static_auth_secret".path;
   };
 
-  # TODO: Use media storage volume on prod
   services.matrix-synapse = {
     enable = true;
     plugins = [
@@ -144,6 +146,12 @@ in {
         user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
       };
       password_config.enabled = false;
+      media_retention = {
+        # Since clearing remote media does the trick for now when it comes to purging old media
+        # keeping local media for virtually unlimited time (for now, may change in the future).
+        local_media_lifetime = "10y";
+        remote_media_lifetime = "90d";
+      };
     };
     extraConfigFiles = let
       format = (pkgs.formats.yaml {}).generate;
