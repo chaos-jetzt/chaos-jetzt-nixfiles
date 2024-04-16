@@ -1,4 +1,8 @@
-{ baseDomain, isDev, config, ... }:
+{ baseDomain
+, isDev
+, config
+, lib
+, ... }:
 
 let
   domain = "pretix.${baseDomain}";
@@ -32,7 +36,7 @@ in {
         user = "pretix";
       };
       mail = {
-        from = "pretix@chaos.jetzt";
+        from = "pretix${lib.optionalString isDev "-dev"}@chaos.jetzt";
         # environmentFile contains user, password, host, port, tls and ssl options
         admins = "administration@chaos.jetzt";
       };
