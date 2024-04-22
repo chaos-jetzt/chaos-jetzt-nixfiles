@@ -61,7 +61,6 @@
     dropRegexen = [ "go_" "promhttp_metric_handler_requests_" ] ++ extraRegexen;
   in
     singleton {
-      inherit (regex);
       regex = "(${concatStringsSep "|" dropRegexen}).*";
       source_labels = ["__name__"];
       action = "drop";
