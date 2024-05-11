@@ -6,7 +6,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     freescout-nix = {
-      url = "git+https://cyberchaos.dev/e1mo/freescout-nix-flake?ref=main";
+      url = "gitlab:e1mo/freescout-nix-flake/main?host=cyberchaos.dev";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
