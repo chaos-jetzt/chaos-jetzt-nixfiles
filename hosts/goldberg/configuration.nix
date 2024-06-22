@@ -11,6 +11,7 @@
     ../../services/freescout.nix
     ../../services/hedgedoc.nix
     ../../services/pretix.nix
+    ../../services/pretalx.nix
   ];
 
   system.stateVersion = "23.05";
