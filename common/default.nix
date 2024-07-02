@@ -1,7 +1,7 @@
 { config, lib, pkgs, inputs, ... }: {
   imports = [
     ./users.nix
-    ../modules/deployment.nix
+    ../modules/chaosjetzt.nix
     # Monitoring is applicable to all hosts, thus placing it here
     ../services/monitoring
   ];

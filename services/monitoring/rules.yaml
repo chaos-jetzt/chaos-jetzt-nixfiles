@@ -9,7 +9,7 @@ groups:
 
       - alert: InstanceDown
         expr: up == 0
-        for: 5m
+        for: 2m
         labels:
           serverity: critical
         annotations:
@@ -32,9 +32,9 @@ groups:
           summary: "OOM kill on {{ $labels.instance }}"
 
       - alert: VeryLowAvailableMemory
-        # Less than 3% available or less than 100KB available memory
+        # Less than 3% available or less than 100KB free memory
         expr: ((node_memory_MemAvailable_percentage < 3) or (node_memory_MemFree_bytes < (1024 * 100)))
-        for: 2m
+        for: 3m
         labels:
           serverity: critical
         annotations:
@@ -117,7 +117,7 @@ groups:
         annotations:
           summary: "No connected alertmanager on {{ $labels.instance }}"
 
-      - alert: AlertmanagerMissing
+      - alert: AlertsDropped
         expr: increase(prometheus_notifications_dropped_total[5m]) > 0
         labels:
           serverity: error
