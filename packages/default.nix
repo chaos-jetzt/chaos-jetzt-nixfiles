@@ -183,4 +183,6 @@ final: prev:
         ];
       };
   })];
+
+  matrixjoinlink = final.callPackage ./matrixjoinlink {};
 }
