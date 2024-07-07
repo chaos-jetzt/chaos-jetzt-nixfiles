@@ -3,7 +3,7 @@
     ./users.nix
     ../modules/chaosjetzt.nix
     # Monitoring is applicable to all hosts, thus placing it here
-    ../services/monitoring
+    ../services/monitoring/client
   ];
 
   environment = {

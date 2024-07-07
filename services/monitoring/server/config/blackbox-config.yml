@@ -1,0 +1,26 @@
+---
+modules:
+  http_2xx_v4:
+    http:
+      fail_if_not_ssl: true
+      ip_protocol_fallback: false
+      preferred_ip_protocol: ip4
+    prober: http
+  http_2xx_v6:
+    http:
+      fail_if_not_ssl: true
+      ip_protocol_fallback: false
+      preferred_ip_protocol: ip6
+    prober: http
+  tcp_tls_v4:
+    prober: tcp
+    tcp:
+      ip_protocol_fallback: false
+      preferred_ip_protocol: ip4
+      tls: true
+  tcp_tls_v6:
+    prober: tcp
+    tcp:
+      ip_protocol_fallback: false
+      preferred_ip_protocol: ip6
+      tls: true
