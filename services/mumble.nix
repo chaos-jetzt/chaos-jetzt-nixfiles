@@ -1,12 +1,19 @@
-{ config, baseDomain, lib, ... }: {
+{
+  config,
+  baseDomain,
+  ...
+}:
+let
+  domain = "mumble.${baseDomain}";
+in {
   sops.secrets."murmur/registry_password".owner = "murmur";
-  security.acme.certs."mumble.${baseDomain}" = {
+  security.acme.certs."${domain}" = {
     group = "murmur";
     reloadServices = [ "murmur.service" ];
   };
 
   services.murmur = let
-    sslDir = config.security.acme.certs."mumble.${baseDomain}".directory;
+    sslDir = config.security.acme.certs."${domain}".directory;
   in {
     enable = true;
     openFirewall = true;
@@ -25,4 +32,6 @@
       obfuscate=true
     '';
   };
+
+  cj.monitoring.blackbox.tcp_tls = [ "${domain}:${toString config.services.murmur.port}" ];
 }

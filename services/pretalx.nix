@@ -48,4 +48,6 @@ in {
       locations."/".recommendedProxySettings = true;
     };
   };
+
+  cj.monitoring.blackbox.http = [ domain ];
 }

@@ -9,12 +9,13 @@ let
   vwDbUser = config.users.users.vaultwarden.name;
   vwDbName = config.users.users.vaultwarden.name;
   isDevStr = lib.optionalString isDev;
+  domain = "passwords.${baseDomain}";
 in {
   sops.secrets = {
     "vaultwarden/env" = {};
   };
 
-  services.nginx.virtualHosts."passwords.${baseDomain}" = {
+  services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
     locations."/".proxyPass = "http://127.0.0.1:${builtins.toString config.services.vaultwarden.config.ROCKET_PORT}";
@@ -39,7 +40,7 @@ in {
       # NOTE (@e1mo): I would _realy_ like to disable E-Mail based 2FA
       # _ENABLE_EMAIL_2FA = false;
       DATABASE_URL = "postgresql:///${vwDbName}";
-      DOMAIN = "https://passwords.${baseDomain}";
+      DOMAIN = "https://${domain}";
       EVENTS_DAYS_RETAIN = 60;
       # Do we want to keep an event log of who viewed whihc password when?
       # See <https://bitwarden.com/de-DE/help/event-logs/> for reference
@@ -65,4 +66,6 @@ in {
   systemd.services.vaultwarden = {
     after = [ "postgresql.service" ];
   };
+
+  cj.monitoring.blackbox.http = [ domain ];
 }

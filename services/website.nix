@@ -97,4 +97,6 @@ in {
     startAt = "weekly";
     serviceConfig.User = "web-deploy";
   };
+
+  cj.monitoring.blackbox.http = [ baseDomain ];
 }
