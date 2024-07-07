@@ -26,6 +26,11 @@ in {
         trust_x_forwarded_proto = true;
         trust_x_forwarded_host = true;
       };
+      metrics = {
+        enabled = true;
+        username = "metrics";
+        # PRETIX_METRICS_PASSPHRASE contained in environment file
+      };
       locale = {
         default = "de-informal";
         timezone = "Europe/Berlin";
@@ -65,5 +70,10 @@ in {
       locations."/".recommendedProxySettings = true;
       locations."/jetzt5".return = "307 https://tickets.chaostreff-flensburg.de/chaos.jetzt/jetzt5";
     };
+  };
+
+  cj.monitoring = {
+    blackbox.http = [ "${domain}/healthcheck" ] ++ map (d: "${d}/healthcheck") config.services.nginx.virtualHosts.${domain}.serverAliases;
+    pretix = [ domain ];
   };
 }
