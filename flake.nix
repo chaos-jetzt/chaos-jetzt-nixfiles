@@ -54,6 +54,12 @@
           ./hosts/goldberg/configuration.nix
         ];
       };
+      hopper = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = defaultModules ++ [
+          ./hosts/hopper/configuration.nix
+        ];
+      };
     };
 
     colmena = {
