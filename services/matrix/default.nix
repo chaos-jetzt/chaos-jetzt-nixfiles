@@ -1,8 +1,12 @@
 { lib, config, pkgs, baseDomain, ... }:  let
   matrixPort = 8008;
+  metricsPort = 8100;
   isDev = (builtins.substring 0 3 baseDomain) == "dev";
   synapseDb = config.services.matrix-synapse.settings.database.args;
   initSynapseDb = ''CREATE DATABASE "${synapseDb.database}" WITH OWNER "${synapseDb.user}" ENCODING "UTF8" TEMPLATE template0 LC_COLLATE = "C" LC_CTYPE = "C";'';
+
+  elementDomain = "chat.${baseDomain}";
+  backendDomain = "matrix.${baseDomain}";
 in {
   sops.secrets = {
     "coturn_static_auth_secret".owner = "turnserver";
@@ -22,7 +26,7 @@ in {
   services.nginx = {
     recommendedProxySettings = true;
     virtualHosts = {
-      "chat.${baseDomain}" = {
+      "${elementDomain}" = {
         enableACME = true;
         forceSSL = true;
 
@@ -31,14 +35,14 @@ in {
         # not sure if we absolutely need to dedup this, just out of complexity perspective
         conf = {
           default_server_config."m.homeserver" = {
-            base_url = "https://matrix.${baseDomain}/";
+            base_url = "https://${backendDomain}/";
             server_name = baseDomain;
           };
           default_country_code = "DE";
         };
       };
     };
-    "matrix.${baseDomain}"  = {
+    "${backendDomain}"  = {
       enableACME = true;
       forceSSL = true;
       # It's also possible to do a redirect here or something else, this vhost is not
@@ -55,6 +59,11 @@ in {
       };
       # Forward requests for e.g. SSO and password-resets.
       locations."/_synapse/client" = {
+        proxyPass = "http://[::1]:${toString matrixPort}";
+        recommendedProxySettings = true;
+      };
+      # For blackbox monitoring purposes.
+      locations."/health" = {
         proxyPass = "http://[::1]:${toString matrixPort}";
         recommendedProxySettings = true;
       };
@@ -100,7 +109,7 @@ in {
     ];
     settings = {
       server_name = baseDomain;
-      public_baseurl = "https://matrix.${baseDomain}";
+      public_baseurl = "https://${backendDomain}";
       allow_public_rooms_over_federation = true;
       enable_registration = false;
       registration_shared_secret_path = config.sops.secrets."synapse/registration_shared_secret".path;
@@ -137,7 +146,7 @@ in {
       ];
       auto_join_rooms = builtins.map (v: "#${v}:${baseDomain}") [ "grosse_halle" "allgemein" ];
       autocreate_auto_join_rooms = true;
-      enable_metrics = false;
+      enable_metrics = true;
       user_directory = {
         enabled = true;
         search_all_users = true;
@@ -164,18 +173,27 @@ in {
       config.sops.secrets."synapse/secret_config".path
       # For our saml sso stuff we need to have additional_ressouces, but they are not possible with the NixOS module listener
       (format "additional_ressources.yaml" {
-        listeners = [{
-          bind_addresses = [ "::1" "127.0.0.1" ];
-          port = matrixPort;
-          type = "http";
-          tls = false;
-          x_forwarded = true;
-          resources = [{
-            names = [ "client" "federation" ];
-            compress = false;
-          }];
-          additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
-        }];
+        listeners = [
+          {
+            bind_addresses = [ "::1" "127.0.0.1" ];
+            port = matrixPort;
+            type = "http";
+            tls = false;
+            x_forwarded = true;
+            resources = [{
+              names = [ "client" "federation" ];
+              compress = false;
+            }];
+            additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
+          }
+          {
+            type = "metrics";
+            port = 8100;
+            # Protected by the firewall
+            bind_addresses = ["::"];
+            # bind_addresses = ["::1" "127.0.0.1"];
+          }
+        ];
       })
     ];
   };
@@ -188,4 +206,7 @@ in {
     unitConfig.RequiresMountsFor = [ config.services.matrix-synapse.settings.media_store_path ];
     serviceConfig.ReadWritePaths = [ config.services.matrix-synapse.settings.media_store_path ];
   };
+
+  cj.monitoring.blackbox.http = [ elementDomain "${backendDomain}/health" ];
+  cj.monitoring.synapse = [ metricsPort ];
 }
