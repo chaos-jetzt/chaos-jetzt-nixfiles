@@ -12,6 +12,7 @@
     ../../services/hedgedoc.nix
     ../../services/pretix.nix
     ../../services/pretalx.nix
+    ../../services/keycloak
   ];
 
   system.stateVersion = "23.05";
