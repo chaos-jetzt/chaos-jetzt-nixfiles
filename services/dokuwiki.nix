@@ -159,4 +159,6 @@ in {
       "opcache.fast_shutdown" = "1";
     };
   };
+
+  cj.monitoring.blackbox.http = [ dw_domain ];
 }

@@ -9,6 +9,7 @@ keys:
   - &shirley age14ysl953378r2vvy7ft3gwce9xp83pr6wypf5lgx2yjwx2lxra5qs6j8eqe
   - &goldberg age1w3wqxt5t00hjv43dcxlr5rjec5mvuzz9ajc8k04azq0gfx0ncgysu6mdmm
   - &hamilton age1uw83n25fx9th2q5y2yedeyzmtzk5yjtwx0kh054v5r2mxc0utuwqacdf77
+  - &hopper age1hzg5camzwyaj0t89xwu7zr506tk02c2z6k0ayh8pfml2lfvl6assyw2xkk
 creation_rules:
   - path_regex: secrets\/all\/*
     key_groups:
@@ -17,6 +18,7 @@ creation_rules:
         - *shirley
         - *goldberg
         - *hamilton
+        - *hopper
   - path_regex: secrets\/shirley\/*
     key_groups:
       - pgp: [ *e1mo, *adb, *momme ]
@@ -32,3 +34,8 @@ creation_rules:
       - pgp: [ *e1mo, *adb, *momme ]
         age:
         - *hamilton
+  - path_regex: secrets\/hopper\/*
+    key_groups:
+      - pgp: [ *e1mo, *adb, *momme ]
+        age:
+        - *hopper

@@ -1,5 +1,8 @@
-{ lib, pkgs, config, ... }: {
-  cj.deployment.environment = "dev";
+{ lib, config, ... }: {
+  cj = {
+    deployment.environment = "dev";
+    monitoring.interface = "ens10";
+  };
 
   imports = [
     ./hardware-config.nix
@@ -12,6 +15,7 @@
     ../../services/hedgedoc.nix
     ../../services/pretix.nix
     ../../services/pretalx.nix
+    ../../services/monitoring/server
   ];
 
   system.stateVersion = "23.05";
@@ -35,6 +39,9 @@
     registerPassword = lib.mkForce "";
     environmentFile = lib.mkForce null;
   };
+
+  # Just so the disk won't fill up from the logs
+  services.prometheus.retentionTime = lib.mkForce "5d";
 
   # This is specific to every host!
   systemd.mounts = [{

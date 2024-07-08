@@ -8,7 +8,15 @@ groups:
         expr: count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})
 
       - alert: InstanceDown
-        expr: up == 0
+        expr: up{job="node"} == 0
+        for: 4m
+        labels:
+          serverity: critical
+        annotations:
+          summary: "{{ $labels.instance }} down"
+
+      - alert: InstanceDownAny
+        expr: up{job!~"(blackbox_.*|node)"} == 0
         for: 5m
         labels:
           serverity: critical
@@ -137,3 +145,63 @@ groups:
           serverity: warn
         annotations:
           summary: "Failing rule evaluations on {{ $labels.instance }}"
+
+  - name: Blackbox
+    rules:
+      - alert: BlackboxProbeFaile
+        expr: probe_success == 0
+        for: 10m
+        labels:
+          serverity: error
+        annotations:
+          summary: "{{ $labels.instance }} ({{ $labels.job }}) down"
+
+      - alert: BlackboxSslCertificateWillExpireSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 25
+        for: 15m
+        labels:
+          severity: notice
+          service: blackbox
+        annotations:
+          summary: "SSL Certificate for {{ $labels.instance }} will expire soon"
+
+      - alert: BlackboxSslCertificateExpired
+        expr: probe_ssl_earliest_cert_expiry - time() <= 0
+        for: 5m
+        labels:
+          severity: warning
+          service: blackbox
+        annotations:
+          summary: "SSL Certificate for {{ $labels.instance }} has expired"
+  - name: synapse
+    rules:
+      - record: synapse_storage_events_persisted_by_source_type
+        expr: sum without(type, origin_type, origin_entity) (synapse_storage_events_persisted_events_sep_total{origin_type="remote"})
+        labels:
+          type: remote
+      - record: synapse_storage_events_persisted_by_source_type
+        expr: sum without(type, origin_type, origin_entity) (synapse_storage_events_persisted_events_sep_total{origin_entity="*client*",origin_type="local"})
+        labels:
+          type: local
+      - record: synapse_storage_events_persisted_by_source_type
+        expr: sum without(type, origin_type, origin_entity) (synapse_storage_events_persisted_events_sep_total{origin_entity!="*client*",origin_type="local"})
+        labels:
+          type: bridges
+
+      - record: synapse_storage_events_persisted_by_event_type
+        expr: sum without(origin_entity, origin_type) (synapse_storage_events_persisted_events_sep_total)
+
+      - record: synapse_storage_events_persisted_by_origin
+        expr: sum without(type) (synapse_storage_events_persisted_events_sep_total)
+  - name: nginx
+    rules:
+      - record: nginx_http_response_count_total:status_class
+        expr: 'sum by (instance, job, method, vhost, status_class, scheme) (label_replace(nginx_http_response_count_total, "status_class", "${1}xx", "status", "(\\d)\\d{2}"))'
+      - alert: NGINXManyServerErrors
+        expr: sum by (instance,vhost) (irate(nginx_http_response_count_total:status_class{status_class="5xx"}[1m])) / sum by (instance,vhost) (irate(nginx_http_response_count_total:status_class[1m])) > 0.33
+        for: 10m
+        labels:
+          severity: warning
+          service: nginx
+        annotations:
+          summary: "Over one third of requests for {{ $labels.vhost }} return a 5xx code"

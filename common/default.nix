@@ -1,22 +1,25 @@
 { config, lib, pkgs, inputs, ... }: {
   imports = [
     ./users.nix
-    ../modules/deployment.nix
+    ../modules/chaosjetzt.nix
     # Monitoring is applicable to all hosts, thus placing it here
-    ../services/monitoring
+    ../services/monitoring/client
   ];
 
-  environment.systemPackages = with pkgs; [
-    htop
-    vim
-    tmux
-    rsync
-    curl
-    wget
-    bat
-    fd
-    ripgrep
-  ];
+  environment = {
+    systemPackages = with pkgs; [
+      htop
+      vim
+      tmux
+      rsync
+      curl
+      wget
+      bat
+      fd
+      ripgrep
+    ];
+    enableAllTerminfo = true;
+  };
 
   nix = {
     package = pkgs.nixVersions.stable;
@@ -55,10 +58,6 @@
     };
   };
   # That way we can't forget to disable the access logs for each individual website
-  services.nginx.appendHttpConfig = ''
-    access_log off;
-    log_not_found off;
-  '';
   security.acme = {
     acceptTerms = true;
     defaults.email = "acme+${config.networking.hostName}@chaos.jetzt";

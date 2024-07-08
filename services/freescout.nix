@@ -1,6 +1,8 @@
 { pkgs, config, baseDomain, ... }:
 
-{
+let
+  domain = "support.${baseDomain}";
+in {
   sops.secrets."freescout/app_key" = {
     owner = "freescout";
     format = "yaml";
@@ -8,8 +10,8 @@
   };
 
   services.freescout = {
+    inherit domain;
     enable = true;
-    domain = "support.${baseDomain}";
     phpPackage = pkgs.php82;
 
     settings = {
@@ -23,4 +25,6 @@
       enableACME = true;
     };
   };
+
+  cj.monitoring.blackbox.http = [ domain ];
 }

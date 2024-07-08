@@ -72,4 +72,6 @@ in {
 
   # Required for nginx to be able to access the hedgedoc socket
   users.users.nginx.extraGroups = [ "hedgedoc" ];
+
+  cj.monitoring.blackbox.http = [ "${domain}/_health" ];
 }
