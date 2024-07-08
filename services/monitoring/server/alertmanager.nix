@@ -1,8 +1,12 @@
-{ config,
-... }:
+{
+  config,
+  baseDomain,
+  ...
+}:
 
 let
   inherit (config.networking) fqdn hostName;
+  publicMonitoringDomain = "monitoring.${baseDomain}";
 in {
   sops.secrets."alertmanager/env" = {
     format = "yaml";
@@ -11,8 +15,10 @@ in {
 
   services.prometheus.alertmanager = {
     enable = true;
-    extraFlags = ["--web.route-prefix=\"/\"" "--cluster.listen-address="];
-    webExternalUrl = "https://${fqdn}/alertmanager/";
+    webExternalUrl = "https://${publicMonitoringDomain}/alertmanager/";
+    extraFlags = [
+      "--web.route-prefix=\"/\""
+    ];
     environmentFile = config.sops.secrets."alertmanager/env".path;
 
     configuration = {

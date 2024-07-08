@@ -2,6 +2,7 @@
   config,
   lib,
   outputs,
+  baseDomain,
   ...
 }:
 
@@ -12,6 +13,7 @@ let
   # The domain under which the internal (monitoring network) IPs
   # are to be found (will be <hostname>.mon.<config.networking.domain>)
   monitoringBaseDomain = "mon.${config.networking.domain}";
+  publicMonitoringDomain = "monitoring.${baseDomain}";
 
   allTargets = let
     /* Basically a manual list of (legacy) hosts not yet migrated to NixOS
@@ -99,6 +101,10 @@ in {
 
   services.prometheus = {
     enable = true;
+    webExternalUrl = "https://${publicMonitoringDomain}/prometheus/";
+    extraFlags = [
+      "--web.route-prefix=\"/\""
+    ];
     ruleFiles = [
       ./config/rules.yaml
     ];

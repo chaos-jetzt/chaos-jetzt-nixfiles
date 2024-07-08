@@ -88,18 +88,4 @@ in {
       news.news_feed_enabled = false;
     };
   };
-
-  users.users.nginx.extraGroups = [ "grafana" ];
-  services.nginx.enable = true;
-  services.nginx.virtualHosts.${domain} = {
-    locations."/grafana" = {
-      proxyPass = "http://unix:${toString config.services.grafana.settings.server.socket}";
-      proxyWebsockets = true;
-    };
-    locations."/".return = "307 /grafana";
-    enableACME = true;
-    forceSSL = true;
-  };
-
-  cj.monitoring.blackbox.http = [ domain ];
 }
