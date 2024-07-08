@@ -24,6 +24,7 @@ in {
   ];
 
   services.nginx = {
+    enable = true;
     recommendedProxySettings = true;
     virtualHosts = {
       "${elementDomain}" = {
