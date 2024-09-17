@@ -108,6 +108,7 @@ in {
     plugins = [
       pkgs.python3Packages.matrix-synapse-saml-mapper
     ];
+    withJemalloc = true;
     settings = {
       server_name = baseDomain;
       public_baseurl = "https://${backendDomain}";
