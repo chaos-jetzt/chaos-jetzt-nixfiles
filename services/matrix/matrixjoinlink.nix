@@ -24,8 +24,7 @@
       admins = [
         "@e1mo:${baseDomain}"
         "@ruru4143:gemeinsam.jetzt"
-        "@adb:adb.sh"
-        "@momme:${baseDomain}"
+        "@servermensch:chat.dezentrale.space"
       ];
       users = [
         ":${baseDomain}"

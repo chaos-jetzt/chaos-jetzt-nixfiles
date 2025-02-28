@@ -36,7 +36,7 @@ in {
           email_configs = [
             { to = "jetzt+mon@e1mo.de";
               send_resolved = true; }
-            { to = "admin+mon@adb.sh";
+            { to = "jetzt@servermensch.de";
               send_resolved = true; }
           ];
         }

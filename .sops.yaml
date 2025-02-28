@@ -2,8 +2,7 @@ keys:
   # People
   # TODO: Add @ruru (I was not able to find a current gpg key @e1mo)
   - &e1mo 67BEE56343B6420D550EDF2A6D617FD0A85BAADA
-  - &adb B1480CFF9BBE8E2648A26A640B2E7C171E3AD6D7
-  - &momme 5D22C6EC4A6E52469819B56D5EBCCEF2F33F7661
+  - &servermensch A548578F840288B1562891616BBC2042D5FA25E5
 
   # Servers
   - &shirley age14ysl953378r2vvy7ft3gwce9xp83pr6wypf5lgx2yjwx2lxra5qs6j8eqe
@@ -13,7 +12,7 @@ keys:
 creation_rules:
   - path_regex: secrets\/all\/*
     key_groups:
-      - pgp: [ *e1mo, *adb, *momme ]
+      - pgp: [ *e1mo, *servermensch ]
         age:
         - *shirley
         - *goldberg
@@ -21,21 +20,21 @@ creation_rules:
         - *hopper
   - path_regex: secrets\/shirley\/*
     key_groups:
-      - pgp: [ *e1mo, *adb, *momme ]
+      - pgp: [ *e1mo, *servermensch ]
         age:
         - *shirley
   - path_regex: secrets\/goldberg\/*
     key_groups:
-      - pgp: [ *e1mo, *adb, *momme ]
+      - pgp: [ *e1mo, *servermensch ]
         age:
         - *goldberg
   - path_regex: secrets\/hamilton\/*
     key_groups:
-      - pgp: [ *e1mo, *adb, *momme ]
+      - pgp: [ *e1mo, *servermensch ]
         age:
         - *hamilton
   - path_regex: secrets\/hopper\/*
     key_groups:
-      - pgp: [ *e1mo, *adb, *momme ]
+      - pgp: [ *e1mo, *servermensch ]
         age:
         - *hopper
