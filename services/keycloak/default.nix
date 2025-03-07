@@ -57,12 +57,12 @@ in {
       http-relative-path = "/auth";
       http-port = 8081;
       https-port = 8443;
-      proxy = "edge";
+      proxy-headers = "xforwarded";
       spi-theme-welcome-theme = "chaos-jetzt";
       spi-connections-jpa-legacy-migration-strategy = "update";
     };
     plugins = [ pkgs.keycloak-registration-captcha ];
-    themes.cj-keycloak-theme = pkgs.cj-keycloak-theme;
+    #themes.cj-keycloak-theme = pkgs.cj-keycloak-theme;
   };
 
   services.openldap = {
