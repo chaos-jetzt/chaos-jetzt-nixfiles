@@ -60,8 +60,6 @@ in {
         '';
     });
 
-    enable = true;
-
     pluginsConfig = {
       "tag" = true;
       "pagelist" = true;
