@@ -215,4 +215,24 @@ final: prev:
   })];
 
   matrixjoinlink = final.callPackage ./matrixjoinlink {};
+  keycloak-registration-captcha = final.maven.buildMavenPackage rec {
+    pname = "keycloak-registration-captcha";
+    version = "1.1.0";
+    src = final.fetchFromGitHub {
+      owner = "chaos-jetzt";
+      repo = pname;
+      rev = "v${version}";
+      hash = "sha256-133cMOSHtDj1eTS01AuiNQa7aI0tNSCt1rg1mgCEinw=";
+    };
+
+    nativeBuildInputs = [ final.maven ];
+
+    mvnHash = "sha256-GTFDjQT7g1sMfIbH/wkxBS0yJDctW5l3QFsv2aggPN0=";
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 -t "$out" target/registration-captcha.jar
+      runHook postInstall
+    '';
+  };
 }
