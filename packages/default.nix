@@ -152,6 +152,7 @@ final: prev:
         pname = "matrix-synapse-saml-mapper";
         version = "2020-09-21";
         SETUPTOOLS_SCM_PRETEND_VERSION = "0.1+chaos.jetzt.${builtins.substring 0 6 src.rev}.d${builtins.replaceStrings ["-"] [""] version}";
+        pyproject = true;
 
         postPatch = ''
           substituteInPlace setup.py \
@@ -173,6 +174,8 @@ final: prev:
           cp -ar $src/matrix_synapse_saml_mapper/res $out/lib/python*/site-packages/*/
         '';
 
+        build-system = [ pfinal.setuptools-scm ];
+
         nativeBuildInputs = with pfinal; [
           setuptools-scm
         ];
@@ -182,36 +185,6 @@ final: prev:
           final.matrix-synapse-unwrapped
         ];
       };
-
-      pysaml2 = pprev.pysaml2.overrideAttrs (oa: rec {
-        version = "7.5.2";
-
-        src = final.fetchFromGitHub {
-          owner = "IdentityPython";
-          repo = "pysaml2";
-          tag = "v${version}";
-          hash = "sha256-2mvAXTruZqoSBUgfT2VEAnWQXVdviG0e49y7LPK5x00=";
-        };
-
-        patches = (oa.patches or []) ++ [
-          (final.fetchpatch {
-            url = "https://github.com/IdentityPython/pysaml2/pull/977.patch";
-            hash = "sha256-kBNvGk5pwVmpW1wsIWVH9wapu6kjFavaTt4e3Llaw2c=";
-          })
-        ];
-
-        dependencies = (oa.dependencies or []) ++ [
-          pfinal.cryptography
-        ];
-
-        disabledTests = (oa.disabledTests or []) ++ [
-          "test_namespace_processing"
-        ];
-
-        meta = (oa.meta or {}) // {
-          broken = false;
-        };
-      });
   })];
 
   matrixjoinlink = final.callPackage ./matrixjoinlink {};
