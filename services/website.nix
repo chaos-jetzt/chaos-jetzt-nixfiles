@@ -50,6 +50,7 @@ in {
         "/theme/fonts/open-sans/fonts/".extraConfig = ''
           expires 1M;
         '';
+        "/jetzt11".return = "301 https://chaos.jetzt/articles/jetzt11.html";
         "/".extraConfig = ''
           log_not_found off;
           error_page 404 /404.html;
