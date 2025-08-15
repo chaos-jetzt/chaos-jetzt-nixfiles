@@ -152,6 +152,7 @@ final: prev:
         pname = "matrix-synapse-saml-mapper";
         version = "2020-09-21";
         SETUPTOOLS_SCM_PRETEND_VERSION = "0.1+chaos.jetzt.${builtins.substring 0 6 src.rev}.d${builtins.replaceStrings ["-"] [""] version}";
+        pyproject = true;
 
         postPatch = ''
           substituteInPlace setup.py \
@@ -172,6 +173,8 @@ final: prev:
         postInstall = ''
           cp -ar $src/matrix_synapse_saml_mapper/res $out/lib/python*/site-packages/*/
         '';
+
+        build-system = [ pfinal.setuptools-scm ];
 
         nativeBuildInputs = with pfinal; [
           setuptools-scm
