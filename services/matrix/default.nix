@@ -84,11 +84,9 @@ in {
       { name = synapseDb.user; }
     ];
   };
-  systemd.services.postgresql = {
-    postStart = ''
-      $PSQL -tAc "SELECT 1 FROM pg_database WHERE datname = 'matrix-synapse'" | grep -q 1 || $PSQL -tAc '${initSynapseDb}'
-    '';
-  };
+  systemd.services.postgresql-setup.postStart = ''
+    psql -tAc "SELECT 1 FROM pg_database WHERE datname = 'matrix-synapse'" | grep -q 1 || psql -tAc '${initSynapseDb}'
+  '';
 
   security.acme.certs."turn.${baseDomain}" = {
     group = "turnserver";
