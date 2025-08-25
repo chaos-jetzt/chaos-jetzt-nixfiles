@@ -67,7 +67,6 @@ in {
       "sqlite" = true;
       "nspages" = true;
       "move" = true;
-      "icalevents" = true;
       "legalnotice" = true;
       "oauth" = true;
       "oauthkeycloak" = true;
@@ -89,7 +88,6 @@ in {
       smtp
       nspages
       move
-      icalevents
       oauth
       oauthkeycloak
       edittable
@@ -121,21 +119,6 @@ in {
         smtp_pass = get_secret "dokuwiki/smtp_host";
         smtp_ssl = "ssl";
         smtp_port = 465;
-      };
-      plugin.icalevents = {
-        locationUrlPrefix = "";
-        "template:default" = ''
-          === {date}: {summary} ===
-          **Location**: {location_link}
-          {description}'';
-        "template:list" = ''
-          === {date}: {summary} ===
-          **<sup>Location: {location}</sup>**
-          {description}'';
-        "template:custom1" = ''
-          === {date}: {summary} ===
-          {description}
-          **Wo?**: {location_link}'';
       };
       plugin.oauth = {
         register-on-auth = 1;
