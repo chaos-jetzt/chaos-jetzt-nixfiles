@@ -21,6 +21,14 @@ let
     "sso" = SSO;
     "CTFL" = "Chaostreff Flensburg e.V.";
     "ctfl" = CTFL;
+    "Plenum" = "Unser Treffen beim Geekend, bei dem Beschlüsse getroffen werden und wir uns in großer Runde absprechen können";
+    "plenum" = Plenum;
+    "dezentrale" = "Ein Erfa aus Leipzig";
+    "Dezentrale" = dezentrale;
+    "Erfa" = "Erfas sind Hackspaces/Chaostreffs, die zusammen den Erfa-Kreis bilden. Dieser ist in der Satzung vom CCC e.V. beschrieben.";
+    "Hackspace" = "Meint in der Regel einen Chaostreff. Ein Chaostreff ist eine Gemeinschaft intergalaktischer Wesen, die sich regelmäßig zusammen finden und sich den Idealen des CCC e.V. verbunden fühlen.";
+    "TOP" = "Tagesordnungspunkt";
+    "Top" = TOP;
   };
 
   acronyms_file = pkgs.writeText "acronyms.local.conf" ''
