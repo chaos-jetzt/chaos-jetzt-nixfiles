@@ -51,13 +51,15 @@ in {
           expires 1M;
         '';
         "/jetzt11".return = "301 https://chaos.jetzt/articles/jetzt11.html";
+        "/coc". return = "301 https://chaos.jetzt/pages/coc.html";
+        "/info". return = " 301 https://md.chaos.jetzt/jetzt11-geekend-uebersicht#";
         "/".extraConfig = ''
           log_not_found off;
           error_page 404 /404.html;
         '';
         "~* ^(/images/.+)\\.(png|jpe?g)$".extraConfig = ''
           set $base $1;
-          add_header Vary Accept;
+          add_ Vary Accept;
           expires 7d;
           add_header Cache-Control "must-revalidate, s-maxage=86400";
           try_files $request_uri$avif_suffix $base$avif_suffix $request_uri$webp_suffix $base$webp_suffix $request_uri =404;
@@ -85,7 +87,7 @@ in {
       echo "${webroot} is empty"
       cp -a ${pkgs.chaos-jetzt-website-pelican}/* ${webroot}/
       chmod -R ${config.users.users."web-deploy".homeMode} ${webroot}
-      chown -R web-deploy:${config.services.nginx.group} ${webroot}
+      chown -R web-deploy:${config..nginx.group} ${webroot}
     fi
   '';
 
