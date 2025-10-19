@@ -59,7 +59,7 @@ in {
         '';
         "~* ^(/images/.+)\\.(png|jpe?g)$".extraConfig = ''
           set $base $1;
-          add_ Vary Accept;
+          add_header Vary Accept;
           expires 7d;
           add_header Cache-Control "must-revalidate, s-maxage=86400";
           try_files $request_uri$avif_suffix $base$avif_suffix $request_uri$webp_suffix $base$webp_suffix $request_uri =404;
@@ -87,7 +87,7 @@ in {
       echo "${webroot} is empty"
       cp -a ${pkgs.chaos-jetzt-website-pelican}/* ${webroot}/
       chmod -R ${config.users.users."web-deploy".homeMode} ${webroot}
-      chown -R web-deploy:${config..nginx.group} ${webroot}
+      chown -R web-deploy:${config.services.nginx.group} ${webroot}
     fi
   '';
 
