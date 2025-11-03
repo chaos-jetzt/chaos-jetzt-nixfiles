@@ -51,7 +51,7 @@ in {
           expires 1M;
         '';
         "/jetzt11".return = "301 https://chaos.jetzt/articles/jetzt11.html";
-        "/coc".return = "301 https://chaos.jetzt/pages/coc.html";
+        "/coc".return = "301 https://${baseDomain}/pages/coc.html";
         "/info".return = "301 https://md.chaos.jetzt/jetzt11-uebersicht#";
         "/map".return = " 301 https://umap.openstreetmap.fr/en/map/untitled-map_1299912#16/50.1085/8.6523";
         "/".extraConfig = ''
