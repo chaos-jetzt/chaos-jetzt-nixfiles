@@ -123,6 +123,12 @@ final: prev:
     };
   };
 
+  matrix-synapse-unwrapped = prev.matrix-synapse-unwrapped.overridePythonAttrs (oa: {
+    dependencies = oa.dependencies ++ [
+      final.python3Packages.pytz
+    ];
+  });
+  
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [(
     pfinal: pprev: {
       # Waiting for upstream to fix this: https://github.com/NixOS/nixpkgs/issues/469563
