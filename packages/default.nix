@@ -148,6 +148,14 @@ final: prev:
 
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [(
     pfinal: pprev: {
+      # Waiting for upstream to fix this: https://github.com/NixOS/nixpkgs/issues/469563
+      xmlschema = pprev.xmlschema.overrideAttrs (oa: rec {
+        version = "4.1.0";
+        src = oa.src.overrideAttrs (os: {
+          tag = "v${version}";
+          hash = "sha256-3nvl49rlwQpNARmWBSw+faL+yNGqNecokjGGpnaC8a0=";
+        });
+      });
       matrix-synapse-saml-mapper = pfinal.buildPythonPackage rec {
         pname = "matrix-synapse-saml-mapper";
         version = "2020-09-21";
