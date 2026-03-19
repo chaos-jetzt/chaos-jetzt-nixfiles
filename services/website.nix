@@ -50,7 +50,6 @@ in {
         "/theme/fonts/open-sans/fonts/".extraConfig = ''
           expires 1M;
         '';
-        "/12".return = "301 https://chaos.jetzt/articles/jetzt12.html";
         "/jetzt11".return = "301 https://chaos.jetzt/articles/jetzt11.html";
         "/coc".return = "301 https://${baseDomain}/pages/coc.html";
         "/".extraConfig = ''
