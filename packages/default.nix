@@ -1,6 +1,29 @@
 final: prev:
 
 {
+  chaos-jetzt-website-pelican = final.stdenv.mkDerivation {
+    pname = "chaos-jetzt-website-pelican";
+    version = "2023-01-05";
+
+    src = prev.fetchFromGitHub {
+      owner = "chaos-jetzt";
+      repo = "website_pelican";
+      rev = "eb3e32ce87df9a5be3530d57215b997bcac34d81";
+      hash = "sha256-PDxdlO1DYbgcz5BpEkpiqxT0hGKi0RSIpA+d2WKt8J0=";
+    };
+    installTargets = "build";
+    buildFlags = [
+      "publish"
+    ];
+    installPhase = "
+      cp -r public/ $out/
+    ";
+    buildInputs = with final.python3Packages; [
+      pelican
+      markdown
+    ];
+  };
+
   dokuwikiPlugins = {
     tag = final.stdenv.mkDerivation rec {
       name = "tag";
@@ -123,22 +146,8 @@ final: prev:
     };
   };
 
-  matrix-synapse-unwrapped = prev.matrix-synapse-unwrapped.overridePythonAttrs (oa: {
-    dependencies = oa.dependencies ++ [
-      final.python3Packages.pytz
-    ];
-  });
-  
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [(
     pfinal: pprev: {
-      # Waiting for upstream to fix this: https://github.com/NixOS/nixpkgs/issues/469563
-      xmlschema = pprev.xmlschema.overrideAttrs (oa: rec {
-        version = "4.1.0";
-        src = oa.src.overrideAttrs (os: {
-          tag = "v${version}";
-          hash = "sha256-3nvl49rlwQpNARmWBSw+faL+yNGqNecokjGGpnaC8a0=";
-        });
-      });
       matrix-synapse-saml-mapper = pfinal.buildPythonPackage rec {
         pname = "matrix-synapse-saml-mapper";
         version = "2020-09-21";

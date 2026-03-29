@@ -79,6 +79,17 @@ in {
     openssh.authorizedKeys.keys = [ restrictedPubkey ];
   };
 
+  system.activationScripts.web-deploy-public = ''
+    mkdir -m 0750 -p ${webroot}
+    # https://stackoverflow.com/a/17902999
+    if  [[ ! $(ls -A ${webroot} ) ]]; then
+      echo "${webroot} is empty"
+      cp -a ${pkgs.chaos-jetzt-website-pelican}/* ${webroot}/
+      chmod -R ${config.users.users."web-deploy".homeMode} ${webroot}
+      chown -R web-deploy:${config.services.nginx.group} ${webroot}
+    fi
+  '';
+
   # Delete dev website builds older than 28 days
   systemd.services."website-purge-old" = lib.mkIf isDev {
     path = with pkgs; [ fd ];
