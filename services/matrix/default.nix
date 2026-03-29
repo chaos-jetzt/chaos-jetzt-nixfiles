@@ -19,6 +19,10 @@ in {
     "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
+  imports = [
+    ./matrixjoinlink.nix
+  ];
+
   services.nginx = {
     enable = true;
     recommendedProxySettings = true;
