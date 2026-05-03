@@ -25,6 +25,8 @@ let
     "plenum" = Plenum;
     "dezentrale" = "Ein Erfa aus Leipzig";
     "Dezentrale" = dezentrale;
+    „stratum0“ = „Hackspace in Braunschweig“;
+    „Stratum0“ = stratum0;
     "Erfa" = "Erfas sind Hackspaces/Chaostreffs, die zusammen den Erfa-Kreis bilden. Dieser ist in der Satzung vom CCC e.V. beschrieben.";
     "Hackspace" = "Meint in der Regel einen Chaostreff. Ein Chaostreff ist eine Gemeinschaft intergalaktischer Wesen, die sich regelmäßig zusammen finden und sich den Idealen des CCC e.V. verbunden fühlen.";
     "TOP" = "Tagesordnungspunkt";
