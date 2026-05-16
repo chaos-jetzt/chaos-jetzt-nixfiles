@@ -2,6 +2,7 @@
 , isDev
 , config
 , lib
+, pkgs
 , ... }:
 
 let
@@ -18,7 +19,7 @@ in {
         url = "https://${domain}";
         currency = "EUR";
         loglevel = if isDev then "INFO" else "WARNING";
-        plugins_default = "pretix.plugins.sendmail,pretix.plugins.statistics,pretix.plugins.ticketoutputpdf";
+        plugins_default = "pretix.plugins.sendmail,pretix.plugins.statistics,pretix.plugins.ticketoutputpdf,pretix.plugins.dbvat";
         plugins_exclude = "pretix.plugins.paypal,pretix.plugins.paypal2,pretix.plugins.stripe,pretix.plugins.banktransfer";
         audit_comments = true;
         obligatory_2fa = true;
@@ -53,6 +54,10 @@ in {
         enabled = "en,de-informal";
       };
     };
+
+    plugins = [
+      pkgs.pretix-dbvat
+    ];
 
     database.createLocally = true;
     nginx = {
