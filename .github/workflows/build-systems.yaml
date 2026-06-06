@@ -3,64 +3,63 @@ on:
   pull_request:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main, pipeline]
   schedule:
     # Build twice a week to ensure that the cache is always primed
-    - cron: '42 23 * * 1,5'
+    - cron: "42 23 * * 1,5"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@v10
-    - name: Run the Magic Nix Cache
-      uses: DeterminateSystems/magic-nix-cache-action@v4
-    - name: nix flake check
-      run: |
-        nix flake check --no-build
-        echo "## \`nix flake check\` succeeded" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-    - name: Discover nixosConfigurations
-      run: |
-        echo Discovered the following system configs
-        nix flake show . --json | jq ".nixosConfigurations|keys[]" -r
-    - name: Build systems
-      id: build
-      run: |
-        echo "## Building" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "|     | Host | Out path |" >> $GITHUB_STEP_SUMMARY
-        echo "| --- | ---- | -------- |" >> $GITHUB_STEP_SUMMARY
-        any_failed=false
-        for host in $(nix flake show . --json | jq ".nixosConfigurations|keys[]" -r); do
-          echo "::group::Building ${host}"
-          drv=".#nixosConfigurations.$host.config.system.build.toplevel"
-          build_cmd="nix build ${drv}"
-          failed=false
-          $build_cmd --show-trace || { failed=true; any_failed=true; }
-          echo "::endgroup::"
-          if ! $failed; then
-            symbol="✅"
-            out_path=$($build_cmd --print-out-paths)
-            out_path="\`${out_path}\`"
-            echo -e "\x1b[32;1mSuccessfully built .#nixosConfigurations.${host}\x1b[0m"
-          else
-            symbol="❌"
-            out_path="_build failed_"
-            echo -e "\x1b[31;1mFailed to build .#nixosConfigurations.${host}\x1b[0m"
-          fi
-          echo "| $symbol | ${host} | ${out_path} |" >> $GITHUB_STEP_SUMMARY
-        done
-        # Set return-code to 1 if any failed
-        ! $any_failed
-    - name: Diff closures
-      # Still would like to see the changes for the non-failing hosts
-      if: ${{ success() }} || ${{ failure() }}
-      run: ./.github/scripts/diff-hosts.sh
-    - name: Colmena build
-      # This should not cause additional builds. But try to run this command to avoid problems with out colmena configuration
-      run: nix run .#colmena build
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+      - name: Run the Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v13
+      - name: nix flake check
+        run: |
+          nix flake check --no-build
+          echo "## \`nix flake check\` succeeded" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+      - name: Build systems
+        id: build
+        run: |
+          set -x
+          FLAKE_SHOW=$(nix flake show . --json) 
+          HOSTS=$($FLAKE_SHOW | jq ".nixosConfigurations|keys[]" -r)
+          echo "## Building" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "|     | Host | Out path |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | ---- | -------- |" >> $GITHUB_STEP_SUMMARY
+          any_failed=false
+          for host in $HOSTS; do
+            echo "::group::Building ${host}"
+            drv=".#nixosConfigurations.$host.config.system.build.toplevel"
+            build_cmd="nix build ${drv}"
+            failed=false
+            $build_cmd --show-trace || { failed=true; any_failed=true; }
+            echo "::endgroup::"
+            if ! $failed; then
+              symbol="✅"
+              out_path=$($build_cmd --print-out-paths)
+              out_path="\`${out_path}\`"
+              echo -e "\x1b[32;1mSuccessfully built .#nixosConfigurations.${host}\x1b[0m"
+            else
+              symbol="❌"
+              out_path="_build failed_"
+              echo -e "\x1b[31;1mFailed to build .#nixosConfigurations.${host}\x1b[0m"
+            fi
+            echo "| $symbol | ${host} | ${out_path} |" >> $GITHUB_STEP_SUMMARY
+          done
+          # Set return-code to 1 if any failed
+          ! $any_failed
+      - name: Diff closures
+        # Still would like to see the changes for the non-failing hosts
+        if: ${{ success() }} || ${{ failure() }}
+        run: ./.github/scripts/diff-hosts.sh
+      - name: Colmena build
+        # This should not cause additional builds. But try to run this command to avoid problems with out colmena configuration
+        run: nix run .#colmena build
