@@ -15,6 +15,7 @@
     ../../services/hedgedoc.nix
     ../../services/pretix.nix
     ../../services/pretalx.nix
+    ../../services/keycloak
     ../../services/monitoring/server
   ];
 
