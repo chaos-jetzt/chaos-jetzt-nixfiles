@@ -188,4 +188,15 @@ final: prev:
   })];
 
   matrixjoinlink = final.callPackage ./matrixjoinlink {};
+
+  pretix = prev.pretix.overrideAttrs (oa: {
+    # Tests have been fixed in http://github.com/pretix/pretix/commit/5a5a551c21461d9ef36337480c9874d65a9fdba9
+    # but because we can't update currently, doing that manually.
+    disabledTests = (oa.disabledTests or []) ++ [
+      "test_english_no_region_set"
+      "test_english_region_US"
+      "test_german_region_US"
+    ];
+  });
+  pretix-dbvat = final.pretix.passthru.python.pkgs.callPackage ./pretix-dbvat.nix {};
 }

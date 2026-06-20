@@ -8,14 +8,14 @@
     ./hardware-config.nix
     ../../services/mumble.nix
     ../../services/website.nix
-    ../../services/matrix
-    ../../services/vaultwarden.nix
-    ../../services/dokuwiki.nix
-    ../../services/freescout.nix
-    ../../services/hedgedoc.nix
+    #../../services/matrix
+    #../../services/vaultwarden.nix
+    #../../services/dokuwiki.nix
+    #../../services/freescout.nix
+    #../../services/hedgedoc.nix
     ../../services/pretix.nix
-    ../../services/pretalx.nix
-    ../../services/monitoring/server
+    #../../services/pretalx.nix
+    #../../services/monitoring/server
   ];
 
   system.stateVersion = "23.05";
