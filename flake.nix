@@ -1,6 +1,12 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+    # This needs to be pinned because we are stuck with an old matrix version
+    nixpkgs_legacy.url = "github:NixOS/nixpkgs?rev=36bd116f111570ed7944ef620a1273677610c719";
+    colmena = {
+      url = "github:nix-community/colmena";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -12,11 +18,12 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, sops-nix, flake-utils, freescout-nix }: let
+  outputs = inputs@{ self, nixpkgs, nixpkgs_legacy, colmena, sops-nix, flake-utils, freescout-nix }: let
     overlay = import ./packages;
     allOverlays = [
       overlay
       freescout-nix.overlays.default
+      colmena.overlays.default
     ];
     pkgs = import nixpkgs {
       system = "x86_64-linux";
@@ -42,7 +49,7 @@
           ./hosts/shirley/configuration.nix
         ];
       };
-      hamilton = nixpkgs.lib.nixosSystem {
+      hamilton = nixpkgs_legacy.lib.nixosSystem {
         system = "x86_64-linux";
         modules = defaultModules ++ [
           ./hosts/hamilton/configuration.nix
@@ -61,8 +68,8 @@
         ];
       };
     };
-
-    colmena = {
+    
+    colmenaHive = colmena.lib.makeHive ({
       meta.allowApplyAll = false;
       meta.nixpkgs = import nixpkgs {
         system = "x86_64-linux";
@@ -77,10 +84,11 @@
     } // builtins.mapAttrs (name: host: {
       nixpkgs = { inherit (host.config.nixpkgs) system; };
       imports = host._module.args.modules;
-    }) self.nixosConfigurations;
+    }) self.nixosConfigurations);
 
     devShells.x86_64-linux.default = pkgs.mkShell {
-      buildInputs = with pkgs; [ sops colmena ];
+      # pkgs.colmena is needed to get a current colmena version
+      buildInputs = with pkgs; [ sops pkgs.colmena nixfmt yq nix-diff nix-tree ];
     };
 
     overlays.default = overlay;
