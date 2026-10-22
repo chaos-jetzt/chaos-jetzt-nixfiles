@@ -1,30 +1,40 @@
-{ pkgs, config, baseDomain, ... }:
+{
+  pkgs,
+  config,
+  baseDomain,
+  modulesPath,
+  ...
+}:
 
 let
   domain = "support.${baseDomain}";
-in {
-  sops.secrets."freescout/app_key" = {
-    owner = "freescout";
-    format = "yaml";
-    sopsFile = ../secrets/all/secrets.yaml;
-  };
+in
+{
 
-  services.freescout = {
-    inherit domain;
-    enable = true;
-    phpPackage = pkgs.php82;
-
-    settings = {
-      APP_KEY._secret  = config.sops.secrets."freescout/app_key".path;
-      APP_ENV = "local";
-      APP_DEBUG = true;
+  disabledModules = [ "services/web-apps/freescout.nix" ];
+  config = {
+    sops.secrets."freescout/app_key" = {
+      owner = "freescout";
+      format = "yaml";
+      sopsFile = ../secrets/all/secrets.yaml;
     };
-    databaseSetup.enable = true;
-    nginx = {
-      forceSSL = true;
-      enableACME = true;
-    };
-  };
 
-  cj.monitoring.blackbox.http = [ domain ];
+    services.freescout = {
+      inherit domain;
+      enable = true;
+      phpPackage = pkgs.php82;
+
+      settings = {
+        APP_KEY._secret = config.sops.secrets."freescout/app_key".path;
+        APP_ENV = "local";
+        APP_DEBUG = true;
+      };
+      databaseSetup.enable = true;
+      nginx = {
+        forceSSL = true;
+        enableACME = true;
+      };
+    };
+    cj.monitoring.blackbox.http = [ domain ];
+  };
 }
