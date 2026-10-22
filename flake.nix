@@ -34,11 +34,14 @@
       freescout-nix.nixosModules.freescout
       ./common/default.nix
       {
-        nixpkgs.overlays = allOverlays;
-        _module.args = {
-          inherit inputs;
-          outputs = self;
+        config = {
+          nixpkgs.overlays = allOverlays;
+          _module.args = {
+            inherit inputs;
+            outputs = self;
+          };
         };
+        disabledModules = [ "services/web-apps/freescout.nix" ];
       }
     ];
   in {

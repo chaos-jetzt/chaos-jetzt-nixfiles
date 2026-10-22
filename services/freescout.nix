@@ -11,7 +11,6 @@ let
 in
 {
 
-  disabledModules = [ "services/web-apps/freescout.nix" ];
   config = {
     sops.secrets."freescout/app_key" = {
       owner = "freescout";
