@@ -44,38 +44,32 @@
         disabledModules = [ "services/web-apps/freescout.nix" ];
       }
     ];
-  in {
-    nixosConfigurations = {
-      shirley = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = defaultModules ++ [
-          ./hosts/shirley/configuration.nix
-        ];
-      };
-      hamilton = nixpkgs_legacy.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = defaultModules ++ [
-          ./hosts/hamilton/configuration.nix
-        ];
-      };
-      goldberg = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = defaultModules ++ [
-          ./hosts/goldberg/configuration.nix
-        ];
-      };
-      hopper = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = defaultModules ++ [
-          ./hosts/hopper/configuration.nix
-        ];
-      };
+    nodes = {
+      shirley = nixpkgs;
+      hamilton = nixpkgs_legacy;
+      goldberg = nixpkgs;
+      hopper = nixpkgs;
     };
+  in {
+    nixosConfigurations = builtins.mapAttrs (name: nixpkgs': nixpkgs'.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = defaultModules ++ [
+          ./hosts/${name}/configuration.nix
+          {
+            _module.args.nixpkgs = nixpkgs';
+          }
+        ];
+    }) nodes;
     
     colmenaHive = colmena.lib.makeHive ({
       meta.allowApplyAll = false;
-      meta.nixpkgs = import nixpkgs {
-        system = "x86_64-linux";
+      meta = {
+        nixpkgs = import nixpkgs {
+          system = "x86_64-linux";
+        };
+        nodeNixpkgs = builtins.mapAttrs (_: nixpkgs': import nixpkgs' {
+          system = "x86_64-linux";
+        }) nodes;
       };
       defaults = { name, config, ... }: {
         deployment = {

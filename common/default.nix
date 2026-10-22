@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  inputs,
+  nixpkgs,
   ...
 }:
 {
@@ -35,7 +35,6 @@
       "root"
       "@wheel"
     ];
-    registry.nixpkgs.flake = lib.mkIf (lib.versionOlder config.system.nixos.release "26.11") inputs.nixpkgs;
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
