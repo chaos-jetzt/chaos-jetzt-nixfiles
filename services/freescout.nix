@@ -21,7 +21,16 @@ in
     services.freescout = {
       inherit domain;
       enable = true;
-      phpPackage = pkgs.php82;
+      package = pkgs.freescout.overrideAttrs (oa: {
+        version = "1.8.241";
+        src = oa.src.overrideAttrs {
+          hash = "sha256-iHg9KSSksV4+ZbCn+aC0ubNDt91CbuZDK3K5Bf7qIi4=";
+        };
+      });
+      # It has to be php83 since starting with php84, opcache
+      # (which the old freescout-nix-flake assumes to exist)
+      # is not included as an plugin anymore.
+      phpPackage = pkgs.php83;
 
       settings = {
         APP_KEY._secret = config.sops.secrets."freescout/app_key".path;
