@@ -27,9 +27,8 @@ jobs:
       - name: Build systems
         id: build
         run: |
-          set -x
-          FLAKE_SHOW=$(nix flake show . --json) 
-          HOSTS=$($FLAKE_SHOW | jq ".nixosConfigurations|keys[]" -r)
+          HOSTS=$(nix eval $1#nixosConfigurations --json --apply 'builtins.attrNames' | jq '.[]' -r)
+          echo "(debug) detected hosts: $HOSTS"
           echo "## Building" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "|     | Host | Out path |" >> $GITHUB_STEP_SUMMARY
