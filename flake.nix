@@ -47,7 +47,7 @@
     nodes = {
       shirley = nixpkgs;
       hamilton = nixpkgs_legacy;
-      goldberg = nixpkgs;
+      goldberg = nixpkgs_legacy;
       hopper = nixpkgs;
     };
   in {
