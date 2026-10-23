@@ -125,4 +125,13 @@
           MaxRetentionSec=14d
         '';
       };
+
+  # Block compromised eMudhra certificates
+  # See: https://emudhra.we-have-a-problem.com/
+  security.pki.caCertificateBlacklist =
+    lib.mkIf (lib.versionOlder config.system.nixos.release "26.11")
+      [
+        "Comodo AAA Services root"
+        "emSign ECC Root CA - G3"
+      ];
 }
