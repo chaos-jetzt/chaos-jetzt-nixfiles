@@ -19,9 +19,10 @@ in {
     "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
-  imports = [
-    ./matrixjoinlink.nix
-  ];
+  # Disabled because it constantly crashes
+  # imports = [
+  #   ./matrixjoinlink.nix
+  # ];
 
   services.nginx = {
     enable = true;

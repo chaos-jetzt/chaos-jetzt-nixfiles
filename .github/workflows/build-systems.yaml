@@ -15,8 +15,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install Nix
+      - name: Install upstream Nix
         uses: DeterminateSystems/nix-installer-action@v22
+        with:
+          determinate: false
       - name: Run the Magic Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@v13
       - name: nix flake check
@@ -27,9 +29,8 @@ jobs:
       - name: Build systems
         id: build
         run: |
-          set -x
-          FLAKE_SHOW=$(nix flake show . --json) 
-          HOSTS=$($FLAKE_SHOW | jq ".nixosConfigurations|keys[]" -r)
+          HOSTS=$(nix eval $1#nixosConfigurations --json --apply 'builtins.attrNames' | jq '.[]' -r)
+          echo "(debug) detected hosts: $HOSTS"
           echo "## Building" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "|     | Host | Out path |" >> $GITHUB_STEP_SUMMARY

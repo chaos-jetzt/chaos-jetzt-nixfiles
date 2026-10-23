@@ -1,4 +1,11 @@
-{ config, lib, pkgs, inputs, ... }: {
+{
+  config,
+  lib,
+  pkgs,
+  nixpkgs,
+  ...
+}:
+{
   imports = [
     ./users.nix
     ../modules/chaosjetzt.nix
@@ -24,8 +31,10 @@
   nix = {
     package = pkgs.nixVersions.stable;
     settings.auto-optimise-store = lib.mkDefault true;
-    settings.trusted-users = [ "root" "@wheel" ];
-    registry.nixpkgs.flake = inputs.nixpkgs;
+    settings.trusted-users = [
+      "root"
+      "@wheel"
+    ];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -45,7 +54,11 @@
   networking.firewall = {
     logRefusedConnections = false;
     enable = true;
-    allowedTCPPorts = (lib.optionals (config.services.nginx.enable) [ 80 443 ])
+    allowedTCPPorts =
+      (lib.optionals (config.services.nginx.enable) [
+        80
+        443
+      ])
       ++ config.services.openssh.ports;
   };
 
@@ -89,9 +102,36 @@
     # ####### #
   '';
 
-  services.journald.extraConfig = ''
-    SystemMaxUse=2G
-    SystemKeepFree=1G
-    MaxRetentionSec=14d
-  '';
+  nixpkgs.config = {
+    problems.handlers = {
+      pysaml2.broken = "warn";
+    };
+  };
+  services.journald =
+    if (lib.versionAtLeast config.system.nixos.release "26.11") then
+      {
+        settings.Journal = {
+          SystemMaxUse = "2G";
+          SystemKeepFree = "1G";
+          MaxRetentionSec = "14d";
+        };
+
+      }
+    else
+      {
+        extraConfig = ''
+          SystemMaxUse=2G
+          SystemKeepFree=1G
+          MaxRetentionSec=14d
+        '';
+      };
+
+  # Block compromised eMudhra certificates
+  # See: https://emudhra.we-have-a-problem.com/
+  security.pki.caCertificateBlacklist =
+    lib.mkIf (lib.versionOlder config.system.nixos.release "26.11")
+      [
+        "Comodo AAA Services root"
+        "emSign ECC Root CA - G3"
+      ];
 }

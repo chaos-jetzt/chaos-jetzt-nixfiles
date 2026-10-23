@@ -26,6 +26,7 @@ in {
       enable = true;
     };
     database.createLocally = true;
+  } // lib.optionalAttrs (lib.versionOlder config.system.nixos.release "26.11") {
     celery.enable = true;
   };
 
