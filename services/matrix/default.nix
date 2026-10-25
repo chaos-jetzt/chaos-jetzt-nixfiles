@@ -6,7 +6,7 @@
   initSynapseDb = ''CREATE DATABASE "${synapseDb.database}" WITH OWNER "${synapseDb.user}" ENCODING "UTF8" TEMPLATE template0 LC_COLLATE = "C" LC_CTYPE = "C";'';
 
   elementDomain = "chat.${baseDomain}";
-  backendDomain = "matrix.${baseDomain}";
+  backendDomain = config.cj.matrix.synapse.domain;
 in {
   sops.secrets = {
     "coturn_static_auth_secret".owner = "turnserver";
@@ -19,10 +19,9 @@ in {
     "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
-  # Disabled because it constantly crashes
-  # imports = [
-  #   ./matrixjoinlink.nix
-  # ];
+  imports = [
+    ./mas.nix
+  ];
 
   services.nginx = {
     enable = true;
@@ -104,9 +103,6 @@ in {
 
   services.matrix-synapse = {
     enable = true;
-    plugins = [
-      pkgs.python3Packages.matrix-synapse-saml-mapper
-    ];
     withJemalloc = true;
     settings = {
       server_name = baseDomain;
@@ -139,7 +135,7 @@ in {
         ct = config.services.coturn;
         port = builtins.toString ct.listening-port;
         tlsPort = builtins.toString ct.tls-listening-port;
-      in [
+        in [
         "turn:${turn_base}:${port}?transport=tcp"
         "turn:${turn_base}:${port}?transport=udp"
         "turns:${turn_base}:${tlsPort}?transport=tcp"
@@ -152,13 +148,13 @@ in {
         enabled = true;
         search_all_users = true;
       };
-      saml2_config = {
-        enabled = true;
-        sp_config.metadata.remote = [{
-          url = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/protocol/saml/descriptor";
-        }];
-        user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
-      };
+      # saml2_config = {
+      #   enabled = true;
+      #   sp_config.metadata.remote = [{
+      #     url = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/protocol/saml/descriptor";
+      #   }];
+      #   user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
+      # };
       password_config.enabled = "only_for_reauth";
       media_retention = {
         # Since clearing remote media does the trick for now when it comes to purging old media
