@@ -10,6 +10,7 @@
 in {
   sops.secrets = {
     "coturn_static_auth_secret".owner = "turnserver";
+    "mas/shared_secret".owner = "matrix-synapse";
     "synapse/signing_key" = {
       owner = "matrix-synapse";
       path = config.services.matrix-synapse.settings.signing_key_path;
@@ -113,7 +114,9 @@ in {
       log_config = ./synapse-log_config.yaml;
       database = {
         name = "psycopg2";
-        args.database = "matrix-synapse";
+        args = {
+          database = "matrix-synapse";
+        };
       };
       federation_ip_range_blacklist = [
         "127.0.0.0/8"
@@ -142,6 +145,12 @@ in {
         "turns:${turn_base}:${tlsPort}?transport=udp"
       ];
       auto_join_rooms = builtins.map (v: "#${v}:${baseDomain}") [ "grosse_halle" "allgemein" ];
+      
+      matrix_authentication_service = {
+        enabled= true;
+        endpoint =  "http://localhost:8080/";
+        secret_path = config.sops.secrets."mas/shared_secret".path;
+      };
       autocreate_auto_join_rooms = true;
       enable_metrics = true;
       user_directory = {
@@ -155,7 +164,9 @@ in {
       #   }];
       #   user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
       # };
-      password_config.enabled = "only_for_reauth";
+      # password_config.enabled = "only_for_reauth";
+      # Required for the MAS migration: MAS expects a boolean
+      password_config.enabled = false;
       media_retention = {
         # Since clearing remote media does the trick for now when it comes to purging old media
         # keeping local media for virtually unlimited time (for now, may change in the future).
@@ -181,7 +192,7 @@ in {
               names = [ "client" "federation" ];
               compress = false;
             }];
-            additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
+            # additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
           }
           {
             type = "metrics";

@@ -3,6 +3,7 @@
   lib,
   baseDomain,
   isDev,
+  pkgs,
   ...
 }:
 
@@ -15,7 +16,7 @@
     "mas/signing_keys/secp384r1" = { };
     "mas/signing_keys/secp256k1" = { };
     "mas/email/smtp_pass" = { };
-    "mas/upstream/client_secret" = {};
+    "mas/upstream/client_secret" = { };
   };
   services.matrix-authentication-service = {
     enable = true;
@@ -72,7 +73,7 @@
         ];
       };
       matrix = {
-        homeserver = config.cj.matrix.synapse.domain;
+        homeserver = config.services.matrix-synapse.settings.server_name;
         endpoint = "http://[::1]:${toString config.cj.matrix.synapse.port}";
         kind = "synapse";
         secret_file = "\${CREDENTIALS_DIRECTORY}/shared_secret";
@@ -94,7 +95,16 @@
           }
         ];
       };
-      passwords.enabled = false;
+      passwords = {
+        enabled = false;
+        schemes = [
+          {
+            version = 1;
+            algorithm = "bcrypt";
+            unicode_normalization = true;
+          }
+        ];
+      };
       account = {
         email_change_allowed = false;
         displayname_change_allowed = true;
@@ -163,4 +173,8 @@
       };
     };
   };
+
+  # Needd for the migration so that we have the secrets
+  # systemd.services.matrix-authentication-service.serviceConfig.ExecStart =
+  #   lib.mkForce "${lib.getExe' pkgs.coreutils "sleep"} 3600";
 }
