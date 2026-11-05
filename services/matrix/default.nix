@@ -109,13 +109,20 @@ in {
   services.matrix-synapse = {
     enable = true;
     withJemalloc = true;
+    log = {
+      root = {
+        handlers = [
+          "journal"
+        ];
+        level = if isDev then "INFO" else "WARNING";
+      };
+    };
     settings = {
       server_name = baseDomain;
       public_baseurl = "https://${backendDomain}";
       allow_public_rooms_over_federation = true;
       enable_registration = false;
       registration_shared_secret_path = config.sops.secrets."synapse/registration_shared_secret".path;
-      log_config = ./synapse-log_config.yaml;
       database = {
         name = "psycopg2";
         args = {
