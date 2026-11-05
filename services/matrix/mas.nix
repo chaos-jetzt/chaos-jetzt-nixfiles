@@ -145,13 +145,16 @@
             };
             displayname = {
               action = "suggest";
-              template = "{{ user.preferred_username }}";
+              template = "{{ user.name }}";
             };
             email = {
-              action = "force";
+              action = "require";
               template = "{{ user.email }}";
             };
-
+            account_name = {
+              action="suggest";
+              template= "@{{ user.preferred_username }}";
+            };
           };
           # When password login is disabled and a single upstream provider
           # is configured, signing out of the authentication service redirects
