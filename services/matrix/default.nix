@@ -123,6 +123,9 @@ in {
       allow_public_rooms_over_federation = true;
       enable_registration = false;
       registration_shared_secret_path = config.sops.secrets."synapse/registration_shared_secret".path;
+      experimental_features = {
+        msc4108_enabled = true;
+      };
       database = {
         name = "psycopg2";
         args = {

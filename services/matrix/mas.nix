@@ -124,6 +124,10 @@
         username = "mail@chaos.jetzt";
         password_file = "\${CREDENTIALS_DIRECTORY}/email_password";
       };
+      oauth = {
+        device_code_grant_enabled = true;
+        device_code_user_code_auto_fill_enabled = true;
+      };
       upstream_oauth2.providers = [
         {
           id = if isDev then "01M5PR7VSHYSE7HH48H1FZMQWB" else "01M5PR6W6XGHTNNM4HQ50WBYJ5";
