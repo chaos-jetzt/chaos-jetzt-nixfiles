@@ -137,6 +137,7 @@
           client_id = "matrix-authentication-service";
           client_secret_file = "\${CREDENTIALS_DIRECTORY}/oidc_client_secret";
           scope = "openid profile email";
+          on_backchannel_logout = "logout_browser_only";
           claims_imports = {
             localpart = {
               action = "suggest";
