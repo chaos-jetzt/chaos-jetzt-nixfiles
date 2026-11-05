@@ -47,6 +47,10 @@ in {
     "${backendDomain}"  = {
       enableACME = true;
       forceSSL = true;
+      locations."~ ^/_matrix/client/(.*)/(login|logout|refresh)" = {
+        proxyPass = "http://localhost:8080";
+        recommendedProxySettings = true;
+      };
       # It's also possible to do a redirect here or something else, this vhost is not
       # needed for Matrix. It's recommended though to *not put* element
       # here, see also the section about Element.
