@@ -132,6 +132,7 @@
         {
           id = if isDev then "01M5PR7VSHYSE7HH48H1FZMQWB" else "01M5PR6W6XGHTNNM4HQ50WBYJ5";
           enabled = true;
+          human_name = "${baseDomain} SSO";
           issuer = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}";
           token_endpoint_auth_method = "client_secret_basic";
           client_id = "matrix-authentication-service";
