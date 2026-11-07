@@ -211,6 +211,8 @@ in {
     ];
   };
 
+  services.synapse-auto-compressor.enable = true;
+
   system.activationScripts."synapse-media-store-mnt".text = ''
       mkdir -p ${lib.escapeShellArg config.services.matrix-synapse.settings.media_store_path}
       chown matrix-synapse:matrix-synapse ${lib.escapeShellArg config.services.matrix-synapse.settings.media_store_path}
