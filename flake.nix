@@ -1,8 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-    # This needs to be pinned because we are stuck with an old matrix version
-    nixpkgs_legacy.url = "github:NixOS/nixpkgs?rev=36bd116f111570ed7944ef620a1273677610c719";
     colmena = {
       url = "github:nix-community/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,7 +16,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs_legacy, colmena, sops-nix, flake-utils, freescout-nix }: let
+  outputs = inputs@{ self, nixpkgs, colmena, sops-nix, flake-utils, freescout-nix }: let
     overlay = import ./packages;
     allOverlays = [
       overlay

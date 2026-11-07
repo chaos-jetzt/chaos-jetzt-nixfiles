@@ -103,29 +103,12 @@
         "type": "github"
       }
     },
-    "nixpkgs_legacy": {
-      "locked": {
-        "lastModified": 1755252206,
-        "narHash": "sha256-YEugeD2DGwn7MLXV7lgRL4dQZOZwgUCCs47o7YV84X4=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "36bd116f111570ed7944ef620a1273677610c719",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "36bd116f111570ed7944ef620a1273677610c719",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "colmena": "colmena",
         "flake-utils": "flake-utils",
         "freescout-nix": "freescout-nix",
         "nixpkgs": "nixpkgs",
-        "nixpkgs_legacy": "nixpkgs_legacy",
         "sops-nix": "sops-nix"
       }
     },
