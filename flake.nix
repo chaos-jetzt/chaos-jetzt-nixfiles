@@ -12,7 +12,6 @@
     freescout-nix = {
       url = "gitlab:e1mo/freescout-nix-flake/main?host=cyberchaos.dev";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
   };
 
@@ -22,7 +21,6 @@
       nixpkgs,
       colmena,
       sops-nix,
-      flake-utils,
       freescout-nix,
     }:
     let
