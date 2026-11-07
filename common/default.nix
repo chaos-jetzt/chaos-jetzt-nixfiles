@@ -102,11 +102,6 @@
     # ####### #
   '';
 
-  nixpkgs.config = {
-    problems.handlers = {
-      pysaml2.broken = "warn";
-    };
-  };
   services.journald =
     if (lib.versionAtLeast config.system.nixos.release "26.11") then
       {

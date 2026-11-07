@@ -6,10 +6,11 @@
   initSynapseDb = ''CREATE DATABASE "${synapseDb.database}" WITH OWNER "${synapseDb.user}" ENCODING "UTF8" TEMPLATE template0 LC_COLLATE = "C" LC_CTYPE = "C";'';
 
   elementDomain = "chat.${baseDomain}";
-  backendDomain = "matrix.${baseDomain}";
+  backendDomain = config.cj.matrix.synapse.domain;
 in {
   sops.secrets = {
     "coturn_static_auth_secret".owner = "turnserver";
+    "mas/shared_secret".owner = "matrix-synapse";
     "synapse/signing_key" = {
       owner = "matrix-synapse";
       path = config.services.matrix-synapse.settings.signing_key_path;
@@ -19,10 +20,9 @@ in {
     "synapse/registration_shared_secret".owner = "matrix-synapse";
   };
 
-  # Disabled because it constantly crashes
-  # imports = [
-  #   ./matrixjoinlink.nix
-  # ];
+  imports = [
+    ./mas.nix
+  ];
 
   services.nginx = {
     enable = true;
@@ -47,6 +47,11 @@ in {
     "${backendDomain}"  = {
       enableACME = true;
       forceSSL = true;
+      # Forward to MAS
+      locations."~ ^/_matrix/client/(.*)/(login|logout|refresh)" = {
+        proxyPass = "http://localhost:8080";
+        recommendedProxySettings = true;
+      };
       # It's also possible to do a redirect here or something else, this vhost is not
       # needed for Matrix. It's recommended though to *not put* element
       # here, see also the section about Element.
@@ -104,20 +109,29 @@ in {
 
   services.matrix-synapse = {
     enable = true;
-    plugins = [
-      pkgs.python3Packages.matrix-synapse-saml-mapper
-    ];
     withJemalloc = true;
+    log = {
+      root = {
+        handlers = [
+          "journal"
+        ];
+        level = if isDev then "INFO" else "WARNING";
+      };
+    };
     settings = {
       server_name = baseDomain;
       public_baseurl = "https://${backendDomain}";
       allow_public_rooms_over_federation = true;
       enable_registration = false;
       registration_shared_secret_path = config.sops.secrets."synapse/registration_shared_secret".path;
-      log_config = ./synapse-log_config.yaml;
+      experimental_features = {
+        msc4108_enabled = true;
+      };
       database = {
         name = "psycopg2";
-        args.database = "matrix-synapse";
+        args = {
+          database = "matrix-synapse";
+        };
       };
       federation_ip_range_blacklist = [
         "127.0.0.0/8"
@@ -139,27 +153,26 @@ in {
         ct = config.services.coturn;
         port = builtins.toString ct.listening-port;
         tlsPort = builtins.toString ct.tls-listening-port;
-      in [
+        in [
         "turn:${turn_base}:${port}?transport=tcp"
         "turn:${turn_base}:${port}?transport=udp"
         "turns:${turn_base}:${tlsPort}?transport=tcp"
         "turns:${turn_base}:${tlsPort}?transport=udp"
       ];
       auto_join_rooms = builtins.map (v: "#${v}:${baseDomain}") [ "grosse_halle" "allgemein" ];
+      
+      matrix_authentication_service = {
+        enabled= true;
+        endpoint =  "http://localhost:8080/";
+        secret_path = config.sops.secrets."mas/shared_secret".path;
+      };
       autocreate_auto_join_rooms = true;
       enable_metrics = true;
       user_directory = {
         enabled = true;
         search_all_users = true;
       };
-      saml2_config = {
-        enabled = true;
-        sp_config.metadata.remote = [{
-          url = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/protocol/saml/descriptor";
-        }];
-        user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
-      };
-      password_config.enabled = "only_for_reauth";
+      password_config.enabled = false;
       media_retention = {
         # Since clearing remote media does the trick for now when it comes to purging old media
         # keeping local media for virtually unlimited time (for now, may change in the future).
@@ -185,7 +198,6 @@ in {
               names = [ "client" "federation" ];
               compress = false;
             }];
-            additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
           }
           {
             type = "metrics";
