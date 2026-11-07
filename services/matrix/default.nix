@@ -47,6 +47,7 @@ in {
     "${backendDomain}"  = {
       enableACME = true;
       forceSSL = true;
+      # Forward to MAS
       locations."~ ^/_matrix/client/(.*)/(login|logout|refresh)" = {
         proxyPass = "http://localhost:8080";
         recommendedProxySettings = true;
@@ -59,13 +60,19 @@ in {
       '';
       # Forward all Matrix API calls to the synapse Matrix homeserver. A trailing slash
       # *must not* be used here.
-      locations."/_matrix" = {
-        proxyPass = "http://[::1]:${toString matrixPort}";
-        recommendedProxySettings = true;
-      };
+      # locations."/_matrix" = {
+      #   proxyPass = "http://[::1]:${toString matrixPort}";
+      #   recommendedProxySettings = true;
+      # };
       # Forward requests for e.g. SSO and password-resets.
       locations."/_synapse/client" = {
         proxyPass = "http://[::1]:${toString matrixPort}";
+        extraConfig = ''
+          allow 2003:f6:170a:3100::/64;
+          allow 84.145.18.254;
+          allow 193.175.5.174;
+          deny all;
+        '';
         recommendedProxySettings = true;
       };
       # For blackbox monitoring purposes.
@@ -231,4 +238,14 @@ in {
 
   cj.monitoring.blackbox.http = [ elementDomain "${backendDomain}/health" ];
   cj.monitoring.synapse = [ metricsPort ];
+
+  # This is used to isolate synapse during updates so that,
+  # in case anything goes wrong, we don't spoil the remote state
+  # and we can safely just re-import a database dump
+  systemd.services."matrix-synapse".serviceConfig = {
+    # Block all outgoing traffic
+    IPAddressDeny = "any";
+    # Only allow communications with localhost for mas
+    IPAddressAllow = "localhost";
+  };
 }
