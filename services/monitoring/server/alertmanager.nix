@@ -5,7 +5,7 @@
 }:
 
 let
-  inherit (config.networking) fqdn hostName;
+  inherit (config.networking) hostName;
   publicMonitoringDomain = "monitoring.${baseDomain}";
 in
 {

@@ -86,7 +86,7 @@
               }
             ) nodes;
           };
-          defaults = { name, config, ... }: {
+          defaults = { config, ... }: {
             deployment = {
               tags = [ config.cj.deployment.environment ];
               targetHost = config.networking.fqdn;
@@ -94,7 +94,7 @@
             };
           };
         }
-        // builtins.mapAttrs (name: host: {
+        // builtins.mapAttrs (_: host: {
           nixpkgs = { inherit (host.config.nixpkgs) system; };
           imports = host._module.args.modules;
         }) self.nixosConfigurations

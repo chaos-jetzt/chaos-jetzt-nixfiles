@@ -3,7 +3,6 @@
   lib,
   baseDomain,
   isDev,
-  pkgs,
   ...
 }:
 
