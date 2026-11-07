@@ -60,19 +60,13 @@ in {
       '';
       # Forward all Matrix API calls to the synapse Matrix homeserver. A trailing slash
       # *must not* be used here.
-      # locations."/_matrix" = {
-      #   proxyPass = "http://[::1]:${toString matrixPort}";
-      #   recommendedProxySettings = true;
-      # };
+      locations."/_matrix" = {
+        proxyPass = "http://[::1]:${toString matrixPort}";
+        recommendedProxySettings = true;
+      };
       # Forward requests for e.g. SSO and password-resets.
       locations."/_synapse/client" = {
         proxyPass = "http://[::1]:${toString matrixPort}";
-        extraConfig = ''
-          allow 2003:f6:170a:3100::/64;
-          allow 84.145.18.254;
-          allow 193.175.5.174;
-          deny all;
-        '';
         recommendedProxySettings = true;
       };
       # For blackbox monitoring purposes.
@@ -178,15 +172,6 @@ in {
         enabled = true;
         search_all_users = true;
       };
-      # saml2_config = {
-      #   enabled = true;
-      #   sp_config.metadata.remote = [{
-      #     url = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/protocol/saml/descriptor";
-      #   }];
-      #   user_mapping_provider.module = "matrix_synapse_saml_mapper.SamlMappingProvider";
-      # };
-      # password_config.enabled = "only_for_reauth";
-      # Required for the MAS migration: MAS expects a boolean
       password_config.enabled = false;
       media_retention = {
         # Since clearing remote media does the trick for now when it comes to purging old media
@@ -213,7 +198,6 @@ in {
               names = [ "client" "federation" ];
               compress = false;
             }];
-            # additional_resources."/_matrix/saml2/pick_username".module = "matrix_synapse_saml_mapper.pick_username_resource";
           }
           {
             type = "metrics";
@@ -238,14 +222,4 @@ in {
 
   cj.monitoring.blackbox.http = [ elementDomain "${backendDomain}/health" ];
   cj.monitoring.synapse = [ metricsPort ];
-
-  # This is used to isolate synapse during updates so that,
-  # in case anything goes wrong, we don't spoil the remote state
-  # and we can safely just re-import a database dump
-  systemd.services."matrix-synapse".serviceConfig = {
-    # Block all outgoing traffic
-    IPAddressDeny = "any";
-    # Only allow communications with localhost for mas
-    IPAddressAllow = "localhost";
-  };
 }

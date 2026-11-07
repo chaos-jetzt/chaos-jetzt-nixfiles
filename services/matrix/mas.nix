@@ -182,8 +182,4 @@
       };
     };
   };
-
-  # Needd for the migration so that we have the secrets
-  # systemd.services.matrix-authentication-service.serviceConfig.ExecStart =
-  #   lib.mkForce "${lib.getExe' pkgs.coreutils "sleep"} 3600";
 }
