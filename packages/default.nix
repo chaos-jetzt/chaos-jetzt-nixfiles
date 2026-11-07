@@ -145,6 +145,4 @@ final: prev:
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
   };
-
-  matrixjoinlink = final.callPackage ./matrixjoinlink {};
 }

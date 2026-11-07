@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  nixpkgs,
   ...
 }:
 {
@@ -70,7 +69,7 @@
       KbdInteractiveAuthentication = false;
     };
   };
-  # That way we can't forget to disable the access logs for each individual website
+
   security.acme = {
     acceptTerms = true;
     defaults.email = "acme+${config.networking.hostName}@chaos.jetzt";
@@ -102,31 +101,12 @@
     # ####### #
   '';
 
-  services.journald =
-    if (lib.versionAtLeast config.system.nixos.release "26.11") then
-      {
-        settings.Journal = {
-          SystemMaxUse = "2G";
-          SystemKeepFree = "1G";
-          MaxRetentionSec = "14d";
-        };
+  services.journald = {
+    settings.Journal = {
+      SystemMaxUse = "2G";
+      SystemKeepFree = "1G";
+      MaxRetentionSec = "14d";
+    };
 
-      }
-    else
-      {
-        extraConfig = ''
-          SystemMaxUse=2G
-          SystemKeepFree=1G
-          MaxRetentionSec=14d
-        '';
-      };
-
-  # Block compromised eMudhra certificates
-  # See: https://emudhra.we-have-a-problem.com/
-  security.pki.caCertificateBlacklist =
-    lib.mkIf (lib.versionOlder config.system.nixos.release "26.11")
-      [
-        "Comodo AAA Services root"
-        "emSign ECC Root CA - G3"
-      ];
+  };
 }
