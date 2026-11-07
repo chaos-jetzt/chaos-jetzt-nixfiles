@@ -83,7 +83,7 @@
 
     devShells.x86_64-linux.default = pkgs.mkShell {
       # pkgs.colmena is needed to get a current colmena version
-      buildInputs = with pkgs; [ sops pkgs.colmena nixfmt yq nix-diff nix-tree ];
+      buildInputs = with pkgs; [ sops pkgs.colmena nixfmt yq nix-diff nix-tree deadnix ];
     };
 
     overlays.default = overlay;
