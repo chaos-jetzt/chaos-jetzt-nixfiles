@@ -1,4 +1,11 @@
-{ lib, config, pkgs, baseDomain, ... }:  let
+{
+  lib,
+  config,
+  pkgs,
+  baseDomain,
+  ...
+}:
+let
   matrixPort = 8008;
   metricsPort = 8100;
   isDev = (builtins.substring 0 3 baseDomain) == "dev";
@@ -7,7 +14,8 @@
 
   elementDomain = "chat.${baseDomain}";
   backendDomain = config.cj.matrix.synapse.domain;
-in {
+in
+{
   sops.secrets = {
     "coturn_static_auth_secret".owner = "turnserver";
     "mas/shared_secret".owner = "matrix-synapse";
@@ -33,56 +41,56 @@ in {
         forceSSL = true;
 
         root = pkgs.element-web.override {
-        # Somewhat duplicate of the stuff in website.nix but I am
-        # not sure if we absolutely need to dedup this, just out of complexity perspective
-        conf = {
-          default_server_config."m.homeserver" = {
-            base_url = "https://${backendDomain}/";
-            server_name = baseDomain;
+          # Somewhat duplicate of the stuff in website.nix but I am
+          # not sure if we absolutely need to dedup this, just out of complexity perspective
+          conf = {
+            default_server_config."m.homeserver" = {
+              base_url = "https://${backendDomain}/";
+              server_name = baseDomain;
+            };
+            default_country_code = "DE";
           };
-          default_country_code = "DE";
         };
       };
-    };
-    "${backendDomain}"  = {
-      enableACME = true;
-      forceSSL = true;
-      # Forward to MAS
-      locations."~ ^/_matrix/client/(.*)/(login|logout|refresh)" = {
-        proxyPass = "http://localhost:8080";
-        recommendedProxySettings = true;
+      "${backendDomain}" = {
+        enableACME = true;
+        forceSSL = true;
+        # Forward to MAS
+        locations."~ ^/_matrix/client/(.*)/(login|logout|refresh)" = {
+          proxyPass = "http://localhost:8080";
+          recommendedProxySettings = true;
+        };
+        # It's also possible to do a redirect here or something else, this vhost is not
+        # needed for Matrix. It's recommended though to *not put* element
+        # here, see also the section about Element.
+        locations."/".extraConfig = ''
+          return 404;
+        '';
+        # Forward all Matrix API calls to the synapse Matrix homeserver. A trailing slash
+        # *must not* be used here.
+        locations."/_matrix" = {
+          proxyPass = "http://[::1]:${toString matrixPort}";
+          recommendedProxySettings = true;
+        };
+        # Forward requests for e.g. SSO and password-resets.
+        locations."/_synapse/client" = {
+          proxyPass = "http://[::1]:${toString matrixPort}";
+          recommendedProxySettings = true;
+        };
+        # For blackbox monitoring purposes.
+        locations."/health" = {
+          proxyPass = "http://[::1]:${toString matrixPort}";
+          recommendedProxySettings = true;
+        };
+        # # Allow public access to the synapse admin API
+        # # The docs advise against leaving this open to just everyone. That's why this currently is commented out
+        # # if admin things need to be done, it's required to SSH to the server and then direct all admin requests to
+        # # localhost:8008/_synapse/admin
+        # # Leaving that in here for when I (e1mo) wonder why calls to the admin API don't work in the future
+        # locations."/_synapse/admin".proxyPass = "http://[::1]:${toString matrixPort}";
       };
-      # It's also possible to do a redirect here or something else, this vhost is not
-      # needed for Matrix. It's recommended though to *not put* element
-      # here, see also the section about Element.
-      locations."/".extraConfig = ''
-        return 404;
-      '';
-      # Forward all Matrix API calls to the synapse Matrix homeserver. A trailing slash
-      # *must not* be used here.
-      locations."/_matrix" = {
-        proxyPass = "http://[::1]:${toString matrixPort}";
-        recommendedProxySettings = true;
-      };
-      # Forward requests for e.g. SSO and password-resets.
-      locations."/_synapse/client" = {
-        proxyPass = "http://[::1]:${toString matrixPort}";
-        recommendedProxySettings = true;
-      };
-      # For blackbox monitoring purposes.
-      locations."/health" = {
-        proxyPass = "http://[::1]:${toString matrixPort}";
-        recommendedProxySettings = true;
-      };
-      # # Allow public access to the synapse admin API
-      # # The docs advise against leaving this open to just everyone. That's why this currently is commented out
-      # # if admin things need to be done, it's required to SSH to the server and then direct all admin requests to
-      # # localhost:8008/_synapse/admin
-      # # Leaving that in here for when I (e1mo) wonder why calls to the admin API don't work in the future
-      # locations."/_synapse/admin".proxyPass = "http://[::1]:${toString matrixPort}";
     };
   };
-};
 
   services.postgresql = {
     enable = true;
@@ -98,14 +106,16 @@ in {
     group = "turnserver";
     reloadServices = [ "coturn.service" ];
   };
-  services.coturn = let
-    sslDir = config.security.acme.certs."turn.${baseDomain}".directory;
-  in {
-    enable = true;
-    cert = "${sslDir}/fullchain.pem";
-    pkey = "${sslDir}/key.pem";
-    static-auth-secret-file = config.sops.secrets."coturn_static_auth_secret".path;
-  };
+  services.coturn =
+    let
+      sslDir = config.security.acme.certs."turn.${baseDomain}".directory;
+    in
+    {
+      enable = true;
+      cert = "${sslDir}/fullchain.pem";
+      pkey = "${sslDir}/key.pem";
+      static-auth-secret-file = config.sops.secrets."coturn_static_auth_secret".path;
+    };
 
   services.matrix-synapse = {
     enable = true;
@@ -148,22 +158,27 @@ in {
       admin_contact = "mailto:administration@chaos.jetzt";
       url_preview_enabled = true;
       media_store_path = "/mnt/synapse_media_store";
-      turn_uris = let
-        turn_base = "turn.${baseDomain}";
-        ct = config.services.coturn;
-        port = builtins.toString ct.listening-port;
-        tlsPort = builtins.toString ct.tls-listening-port;
-        in [
-        "turn:${turn_base}:${port}?transport=tcp"
-        "turn:${turn_base}:${port}?transport=udp"
-        "turns:${turn_base}:${tlsPort}?transport=tcp"
-        "turns:${turn_base}:${tlsPort}?transport=udp"
+      turn_uris =
+        let
+          turn_base = "turn.${baseDomain}";
+          ct = config.services.coturn;
+          port = builtins.toString ct.listening-port;
+          tlsPort = builtins.toString ct.tls-listening-port;
+        in
+        [
+          "turn:${turn_base}:${port}?transport=tcp"
+          "turn:${turn_base}:${port}?transport=udp"
+          "turns:${turn_base}:${tlsPort}?transport=tcp"
+          "turns:${turn_base}:${tlsPort}?transport=udp"
+        ];
+      auto_join_rooms = builtins.map (v: "#${v}:${baseDomain}") [
+        "grosse_halle"
+        "allgemein"
       ];
-      auto_join_rooms = builtins.map (v: "#${v}:${baseDomain}") [ "grosse_halle" "allgemein" ];
-      
+
       matrix_authentication_service = {
-        enabled= true;
-        endpoint =  "http://localhost:8080/";
+        enabled = true;
+        endpoint = "http://localhost:8080/";
         secret_path = config.sops.secrets."mas/shared_secret".path;
       };
       autocreate_auto_join_rooms = true;
@@ -180,46 +195,59 @@ in {
         remote_media_lifetime = "90d";
       };
     };
-    extraConfigFiles = let
-      format = (pkgs.formats.yaml {}).generate;
-    in [
-      # Contains turn_shared_secret, macaroon_secret_key, and form_secret
-      config.sops.secrets."synapse/secret_config".path
-      # For our saml sso stuff we need to have additional_ressouces, but they are not possible with the NixOS module listener
-      (format "additional_ressources.yaml" {
-        listeners = [
-          {
-            bind_addresses = [ "::1" "127.0.0.1" ];
-            port = matrixPort;
-            type = "http";
-            tls = false;
-            x_forwarded = true;
-            resources = [{
-              names = [ "client" "federation" ];
-              compress = false;
-            }];
-          }
-          {
-            type = "metrics";
-            port = 8100;
-            # Protected by the firewall
-            bind_addresses = ["::"];
-            # bind_addresses = ["::1" "127.0.0.1"];
-          }
-        ];
-      })
-    ];
+    extraConfigFiles =
+      let
+        format = (pkgs.formats.yaml { }).generate;
+      in
+      [
+        # Contains turn_shared_secret, macaroon_secret_key, and form_secret
+        config.sops.secrets."synapse/secret_config".path
+        # For our saml sso stuff we need to have additional_ressouces, but they are not possible with the NixOS module listener
+        (format "additional_ressources.yaml" {
+          listeners = [
+            {
+              bind_addresses = [
+                "::1"
+                "127.0.0.1"
+              ];
+              port = matrixPort;
+              type = "http";
+              tls = false;
+              x_forwarded = true;
+              resources = [
+                {
+                  names = [
+                    "client"
+                    "federation"
+                  ];
+                  compress = false;
+                }
+              ];
+            }
+            {
+              type = "metrics";
+              port = 8100;
+              # Protected by the firewall
+              bind_addresses = [ "::" ];
+              # bind_addresses = ["::1" "127.0.0.1"];
+            }
+          ];
+        })
+      ];
   };
 
   system.activationScripts."synapse-media-store-mnt".text = ''
-      mkdir -p ${lib.escapeShellArg config.services.matrix-synapse.settings.media_store_path}
-      chown matrix-synapse:matrix-synapse ${lib.escapeShellArg config.services.matrix-synapse.settings.media_store_path}
+    mkdir -p ${lib.escapeShellArg config.services.matrix-synapse.settings.media_store_path}
+    chown matrix-synapse:matrix-synapse ${lib.escapeShellArg config.services.matrix-synapse.settings.media_store_path}
   '';
   systemd.services.matrix-synapse = {
     unitConfig.RequiresMountsFor = [ config.services.matrix-synapse.settings.media_store_path ];
     serviceConfig.ReadWritePaths = [ config.services.matrix-synapse.settings.media_store_path ];
   };
 
-  cj.monitoring.blackbox.http = [ elementDomain "${backendDomain}/health" ];
+  cj.monitoring.blackbox.http = [
+    elementDomain
+    "${backendDomain}/health"
+  ];
   cj.monitoring.synapse = [ metricsPort ];
 }

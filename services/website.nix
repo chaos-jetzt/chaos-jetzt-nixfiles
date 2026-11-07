@@ -1,9 +1,11 @@
-{ lib
-, pkgs
-, config
-, baseDomain
-, isDev
-, ...}:
+{
+  lib,
+  pkgs,
+  config,
+  baseDomain,
+  isDev,
+  ...
+}:
 
 let
   matrixWellKnown = {
@@ -11,15 +13,18 @@ let
     server."m.server" = "matrix.${baseDomain}:443";
   };
   toJSONFile = name: value: pkgs.writeText name (builtins.toJSON value);
-  matrixWellKnownDir = pkgs.linkFarm "matrix-well-known" (builtins.mapAttrs toJSONFile matrixWellKnown);
+  matrixWellKnownDir = pkgs.linkFarm "matrix-well-known" (
+    builtins.mapAttrs toJSONFile matrixWellKnown
+  );
   webroot = "${config.users.users."web-deploy".home}/public";
-  deployPubKey = if isDev then
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRmpgMjXQCjA/YPNJvaNdKMjr0jnLtwKKbLCIisjeBw dev-deploykey@chaos.jetzt"
-  else
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGfluahnK/YEaj97EN5SjOfUw6vHK13cxfCKIj6wafdB prod-deploykey@chaos.jetzt"
-  ;
+  deployPubKey =
+    if isDev then
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRmpgMjXQCjA/YPNJvaNdKMjr0jnLtwKKbLCIisjeBw dev-deploykey@chaos.jetzt"
+    else
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGfluahnK/YEaj97EN5SjOfUw6vHK13cxfCKIj6wafdB prod-deploykey@chaos.jetzt";
   restrictedPubkey = "command=\"${pkgs.rrsync}/bin/rrsync ${webroot}\" ${deployPubKey}";
-in {
+in
+{
   services.nginx = {
     enable = true;
     enableReload = true;
@@ -63,7 +68,7 @@ in {
           add_header Cache-Control "must-revalidate, s-maxage=86400";
           try_files $request_uri$avif_suffix $base$avif_suffix $request_uri$webp_suffix $base$webp_suffix $request_uri =404;
         '';
-        "/.well-known/matrix/".alias =  matrixWellKnownDir + "/";
+        "/.well-known/matrix/".alias = matrixWellKnownDir + "/";
       };
     };
   };

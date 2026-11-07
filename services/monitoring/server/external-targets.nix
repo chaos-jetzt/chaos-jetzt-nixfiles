@@ -7,7 +7,7 @@
     config = {
       cj = {
         deployment.environment = "prod";
-        monitoring.blackbox.http = ["sso.chaos.jetzt/health/ready"];
+        monitoring.blackbox.http = [ "sso.chaos.jetzt/health/ready" ];
       };
       networking = rec {
         hostName = "lovelace";

@@ -1,7 +1,8 @@
-{ config
-, baseDomain
-, lib
-, ...
+{
+  config,
+  baseDomain,
+  lib,
+  ...
 }:
 
 let
@@ -10,9 +11,10 @@ let
   realm = if isDev then "dev" else "chaos-jetzt";
   sso_url = "https://sso.chaos.jetzt/auth/realms/${realm}/protocol/openid-connect";
   sock_path = "/run/hedgedoc/hedgedoc.sock";
-in {
+in
+{
   # Contains CMD_SESSION_SECRET and CMD_OAUTH2_CLIENT_SECRET
-  sops.secrets."hedgedoc_env" = {};
+  sops.secrets."hedgedoc_env" = { };
 
   services.hedgedoc = {
     enable = true;
@@ -60,14 +62,15 @@ in {
     };
   };
 
-
   services.postgresql = {
     enable = true;
     ensureDatabases = [ "hedgedoc" ];
-    ensureUsers = [{
-      name = "hedgedoc";
-      ensureDBOwnership = true;
-    }];
+    ensureUsers = [
+      {
+        name = "hedgedoc";
+        ensureDBOwnership = true;
+      }
+    ];
   };
 
   # Required for nginx to be able to access the hedgedoc socket

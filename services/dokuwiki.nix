@@ -1,9 +1,10 @@
-{ pkgs
-, config
-, lib
-, baseDomain
-, isDev
-, ...
+{
+  pkgs,
+  config,
+  lib,
+  baseDomain,
+  isDev,
+  ...
 }:
 
 let
@@ -21,14 +22,17 @@ let
     "sso" = SSO;
     "CTFL" = "Chaostreff Flensburg e.V.";
     "ctfl" = CTFL;
-    "Plenum" = "Unser Treffen beim Geekend, bei dem Beschlüsse getroffen werden und wir uns in großer Runde absprechen können";
+    "Plenum" =
+      "Unser Treffen beim Geekend, bei dem Beschlüsse getroffen werden und wir uns in großer Runde absprechen können";
     "plenum" = Plenum;
     "dezentrale" = "Ein Erfa aus Leipzig";
     "Dezentrale" = dezentrale;
     "stratum0" = "Ein Hackspace aus Braunschweig";
     "Stratum0" = stratum0;
-    "Erfa" = "Erfas sind Hackspaces/Chaostreffs, die zusammen den Erfa-Kreis bilden. Dieser ist in der Satzung vom CCC e.V. beschrieben.";
-    "Hackspace" = "Meint in der Regel einen Chaostreff. Ein Chaostreff ist eine Gemeinschaft intergalaktischer Wesen, die sich regelmäßig zusammen finden und sich den Idealen des CCC e.V. verbunden fühlen.";
+    "Erfa" =
+      "Erfas sind Hackspaces/Chaostreffs, die zusammen den Erfa-Kreis bilden. Dieser ist in der Satzung vom CCC e.V. beschrieben.";
+    "Hackspace" =
+      "Meint in der Regel einen Chaostreff. Ein Chaostreff ist eine Gemeinschaft intergalaktischer Wesen, die sich regelmäßig zusammen finden und sich den Idealen des CCC e.V. verbunden fühlen.";
     "TOP" = "Tagesordnungspunkt";
     "Top" = TOP;
   };
@@ -36,22 +40,26 @@ let
   acronyms_file = pkgs.writeText "acronyms.local.conf" ''
     ${lib.concatStringsSep "\n" (lib.mapAttrsToList (short: long: "${short}\t${long}") acronyms)}
   '';
-in {
-  sops.secrets = let
-    dw.owner = fpm_cfg.user; # This is hardcoded to dokuwiki right now, however if that changes we should catch that here
-    dw_all = key:
-      dw
-      // {
-        inherit key;
-        format = "yaml";
-        sopsFile = ../secrets/all/secrets.yaml;
-      };
-  in {
-    "dokuwiki/smtp_pass" = dw_all "smtp/pass";
-    "dokuwiki/smtp_user" = dw_all "smtp/user";
-    "dokuwiki/smtp_host" = dw_all "smtp/host";
-    "dokuwiki/keycloak_key" = dw;
-  };
+in
+{
+  sops.secrets =
+    let
+      dw.owner = fpm_cfg.user; # This is hardcoded to dokuwiki right now, however if that changes we should catch that here
+      dw_all =
+        key:
+        dw
+        // {
+          inherit key;
+          format = "yaml";
+          sopsFile = ../secrets/all/secrets.yaml;
+        };
+    in
+    {
+      "dokuwiki/smtp_pass" = dw_all "smtp/pass";
+      "dokuwiki/smtp_user" = dw_all "smtp/user";
+      "dokuwiki/smtp_host" = dw_all "smtp/host";
+      "dokuwiki/keycloak_key" = dw;
+    };
 
   services.nginx.virtualHosts.${dw_domain} = {
     enableACME = true;
@@ -66,8 +74,8 @@ in {
     package = pkgs.dokuwiki.overrideAttrs (oldAttrs: {
       name = "dokuwiki-${dw_domain}-with-acronyms-${oldAttrs.version}";
       postInstall = oldAttrs.postInstall or "" + ''
-          ln -sf ${acronyms_file} $out/share/dokuwiki/conf/acronyms.local.conf
-        '';
+        ln -sf ${acronyms_file} $out/share/dokuwiki/conf/acronyms.local.conf
+      '';
     });
 
     pluginsConfig = {
@@ -104,41 +112,45 @@ in {
       anonip
     ];
 
-    settings = let
-      get_secret = name: {_file = config.sops.secrets.${name}.path;};
-    in rec {
-      title = "${baseDomain} Wiki";
-      lang = "de-informal";
-      template = "dokuwiki";
-      # authtype = "authplain";
-      authtype = "oauth";
-      subscribers = 1;
-      userewrite = 1;
-      useslash = 1;
-      useacl = true;
-      im_convert = "${pkgs.imagemagick}/bin/convert";
-      superuser = "@admin";
-      disableactions = "register";
-      signature = "--- // [[name:@USER@|@USER@]] @DATE@";
+    settings =
+      let
+        get_secret = name: { _file = config.sops.secrets.${name}.path; };
+      in
+      rec {
+        title = "${baseDomain} Wiki";
+        lang = "de-informal";
+        template = "dokuwiki";
+        # authtype = "authplain";
+        authtype = "oauth";
+        subscribers = 1;
+        userewrite = 1;
+        useslash = 1;
+        useacl = true;
+        im_convert = "${pkgs.imagemagick}/bin/convert";
+        superuser = "@admin";
+        disableactions = "register";
+        signature = "--- // [[name:@USER@|@USER@]] @DATE@";
 
-      mailfrom = "\"@USER@\" via ${title} <wiki@chaos.jetzt>}";
-      plugin.tag.toolbar_icon = 1;
-      plugin.smtp = {
-        smtp_host = get_secret "dokuwiki/smtp_host";
-        smtp_user = get_secret "dokuwiki/smtp_host";
-        smtp_pass = get_secret "dokuwiki/smtp_host";
-        smtp_ssl = "ssl";
-        smtp_port = 465;
+        mailfrom = "\"@USER@\" via ${title} <wiki@chaos.jetzt>}";
+        plugin.tag.toolbar_icon = 1;
+        plugin.smtp = {
+          smtp_host = get_secret "dokuwiki/smtp_host";
+          smtp_user = get_secret "dokuwiki/smtp_host";
+          smtp_pass = get_secret "dokuwiki/smtp_host";
+          smtp_ssl = "ssl";
+          smtp_port = 465;
+        };
+        plugin.oauth = {
+          register-on-auth = 1;
+          singleService = "Keycloak";
+        };
+        plugin.oauthkeycloak = {
+          key = get_secret "dokuwiki/keycloak_key";
+          openidurl = "https://sso.chaos.jetzt/auth/realms/${
+            if isDev then "dev" else "chaos-jetzt"
+          }/.well-known/openid-configuration";
+        };
       };
-      plugin.oauth = {
-        register-on-auth = 1;
-        singleService = "Keycloak";
-      };
-      plugin.oauthkeycloak = {
-        key = get_secret "dokuwiki/keycloak_key";
-        openidurl = "https://sso.chaos.jetzt/auth/realms/${if isDev then "dev" else "chaos-jetzt"}/.well-known/openid-configuration";
-      };
-    };
 
     phpOptions = {
       expose_php = "Off";

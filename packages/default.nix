@@ -49,7 +49,7 @@ final: prev:
       };
       installPhase = "mkdir -p $out; cp -R * $out/";
     };
-    smtp = final.stdenv.mkDerivation rec  {
+    smtp = final.stdenv.mkDerivation rec {
       name = "smtp";
       pname = "dokuwiki-plugin-smtp";
       version = "2023-04-03";
