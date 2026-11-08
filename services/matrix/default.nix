@@ -24,8 +24,19 @@ in
       path = config.services.matrix-synapse.settings.signing_key_path;
       mode = "0600";
     };
-    "synapse/secret_config".owner = "matrix-synapse";
+    "synapse/turn_shared_secret" = {};
+    "synapse/macaroon_secret_key" = {};
+    "synapse/form_secret" = {};
     "synapse/registration_shared_secret".owner = "matrix-synapse";
+  };
+
+  sops.templates."synapse/secret_config" = {
+    owner = "matrix-synapse";
+    file = (pkgs.formats.yaml {}).generate "synapse-secret-config.yaml" {
+      turn_shared_secret = config.sops.placeholder."synapse/turn_shared_secret";
+      macaroon_secret_key = config.sops.placeholder."synapse/macaroon_secret_key";
+      form_secret = config.sops.placeholder."synapse/form_secret";
+    };
   };
 
   imports = [
@@ -220,12 +231,13 @@ in
           port = 8100;
           # Protected by the firewall
           bind_addresses = [ "::" ];
+          tls = false;
           # bind_addresses = ["::1" "127.0.0.1"];
         }
       ];
     };
     # Contains turn_shared_secret, macaroon_secret_key, and form_secret
-    extraConfigFiles = lib.singleton config.sops.secrets."synapse/secret_config".path;
+    extraConfigFiles = lib.singleton config.sops.templates."synapse/secret_config".path;
   };
 
   system.activationScripts."synapse-media-store-mnt".text = ''
