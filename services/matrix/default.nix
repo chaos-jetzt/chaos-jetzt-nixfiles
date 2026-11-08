@@ -194,46 +194,38 @@ in
         local_media_lifetime = "10y";
         remote_media_lifetime = "90d";
       };
-    };
-    extraConfigFiles =
-      let
-        format = (pkgs.formats.yaml { }).generate;
-      in
-      [
-        # Contains turn_shared_secret, macaroon_secret_key, and form_secret
-        config.sops.secrets."synapse/secret_config".path
-        # For our saml sso stuff we need to have additional_ressouces, but they are not possible with the NixOS module listener
-        (format "additional_ressources.yaml" {
-          listeners = [
+
+      listeners = [
+        {
+          bind_addresses = [
+            "::1"
+            "127.0.0.1"
+          ];
+          port = matrixPort;
+          type = "http";
+          tls = false;
+          x_forwarded = true;
+          resources = [
             {
-              bind_addresses = [
-                "::1"
-                "127.0.0.1"
+              names = [
+                "client"
+                "federation"
               ];
-              port = matrixPort;
-              type = "http";
-              tls = false;
-              x_forwarded = true;
-              resources = [
-                {
-                  names = [
-                    "client"
-                    "federation"
-                  ];
-                  compress = false;
-                }
-              ];
-            }
-            {
-              type = "metrics";
-              port = 8100;
-              # Protected by the firewall
-              bind_addresses = [ "::" ];
-              # bind_addresses = ["::1" "127.0.0.1"];
+              compress = false;
             }
           ];
-        })
+        }
+        {
+          type = "metrics";
+          port = 8100;
+          # Protected by the firewall
+          bind_addresses = [ "::" ];
+          # bind_addresses = ["::1" "127.0.0.1"];
+        }
       ];
+    };
+    # Contains turn_shared_secret, macaroon_secret_key, and form_secret
+    extraConfigFiles = lib.singleton config.sops.secrets."synapse/secret_config".path;
   };
 
   system.activationScripts."synapse-media-store-mnt".text = ''
