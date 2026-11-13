@@ -1,13 +1,16 @@
-{ baseDomain
-, isDev
-, config
-, lib
-, ... }:
+{
+  baseDomain,
+  isDev,
+  config,
+  lib,
+  ...
+}:
 
 let
   domain = "pretix.${baseDomain}";
-in {
-  sops.secrets.pretix_env = {};
+in
+{
+  sops.secrets.pretix_env = { };
 
   services.pretix = {
     enable = true;
@@ -73,7 +76,10 @@ in {
   };
 
   cj.monitoring = {
-    blackbox.http = [ "${domain}/healthcheck" ] ++ map (d: "${d}/healthcheck") config.services.nginx.virtualHosts.${domain}.serverAliases;
+    blackbox.http = [
+      "${domain}/healthcheck"
+    ]
+    ++ map (d: "${d}/healthcheck") config.services.nginx.virtualHosts.${domain}.serverAliases;
     pretix = [ domain ];
   };
 }

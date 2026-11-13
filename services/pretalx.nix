@@ -1,13 +1,16 @@
-{ config
-, lib
-, baseDomain
-, isDev
-,... }:
+{
+  config,
+  lib,
+  baseDomain,
+  isDev,
+  ...
+}:
 
 let
   domain = "pretalx.${baseDomain}";
-in {
-  sops.secrets."pretalx_env" = {};
+in
+{
+  sops.secrets."pretalx_env" = { };
   services.pretalx = {
     enable = true;
     plugins = with config.services.pretalx.package.plugins; [
@@ -26,20 +29,23 @@ in {
       enable = true;
     };
     database.createLocally = true;
-  } // lib.optionalAttrs (lib.versionOlder config.system.nixos.release "26.11") {
+  }
+  // lib.optionalAttrs (lib.versionOlder config.system.nixos.release "26.11") {
     celery.enable = true;
   };
 
-  systemd.services = let
-    envfileConfig = {
-      serviceConfig.EnvironmentFile = config.sops.secrets."pretalx_env".path;
+  systemd.services =
+    let
+      envfileConfig = {
+        serviceConfig.EnvironmentFile = config.sops.secrets."pretalx_env".path;
+      };
+    in
+    {
+      pretalx-web = envfileConfig;
+      pretalx-periodic = envfileConfig;
+      pretalx-clear-sessions = envfileConfig;
+      pretalx-worker = envfileConfig;
     };
-  in {
-    pretalx-web = envfileConfig;
-    pretalx-periodic = envfileConfig;
-    pretalx-clear-sessions = envfileConfig;
-    pretalx-worker = envfileConfig;
-  };
 
   services.nginx = {
     enable = true;

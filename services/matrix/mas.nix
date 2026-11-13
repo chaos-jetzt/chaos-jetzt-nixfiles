@@ -3,7 +3,6 @@
   lib,
   baseDomain,
   isDev,
-  pkgs,
   ...
 }:
 
@@ -153,8 +152,8 @@
               template = "{{ user.email }}";
             };
             account_name = {
-              action="suggest";
-              template= "@{{ user.preferred_username }}";
+              action = "suggest";
+              template = "@{{ user.preferred_username }}";
             };
           };
           # When password login is disabled and a single upstream provider

@@ -5,9 +5,10 @@
 }:
 
 let
-  inherit (config.networking) fqdn hostName;
+  inherit (config.networking) hostName;
   publicMonitoringDomain = "monitoring.${baseDomain}";
-in {
+in
+{
   sops.secrets."alertmanager/env" = {
     format = "yaml";
     sopsFile = ../../../secrets/all/secrets.yaml;
@@ -34,10 +35,14 @@ in {
         {
           name = "mail";
           email_configs = [
-            { to = "jetzt+mon@e1mo.de";
-              send_resolved = true; }
-            { to = "jetzt@servermensch.de";
-              send_resolved = true; }
+            {
+              to = "jetzt+mon@e1mo.de";
+              send_resolved = true;
+            }
+            {
+              to = "jetzt@servermensch.de";
+              send_resolved = true;
+            }
           ];
         }
         {
@@ -49,7 +54,10 @@ in {
         receiver = "mail";
         repeat_interval = "16h";
         group_wait = "1m";
-        group_by = ["alertname" "instance"];
+        group_by = [
+          "alertname"
+          "instance"
+        ];
         routes = [
           {
             match.environment = "dev";
@@ -62,8 +70,8 @@ in {
             match.environment = "prod";
             routes = [
               {
-                matchers = ["alertname =~ Blackbox.*"];
-                group_by = ["host"];
+                matchers = [ "alertname =~ Blackbox.*" ];
+                group_by = [ "host" ];
                 group_wait = "5m"; # Due ot the fact, that we do the blackbox checks only every two minutes
               }
               {
@@ -89,33 +97,33 @@ in {
 
       inhibit_rules = [
         {
-          target_matchers = ["alertname = ReducedAvailableMemory"];
-          source_matchers = ["alertname =~ (Very)LowAvailableMemory"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = ReducedAvailableMemory" ];
+          source_matchers = [ "alertname =~ (Very)LowAvailableMemory" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = LowAvailableMemory"];
-          source_matchers = ["alertname = VeryLowAvailableMemory"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = LowAvailableMemory" ];
+          source_matchers = [ "alertname = VeryLowAvailableMemory" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = ElevatedLoad"];
-          source_matchers = ["alertname =~ (Very)HighLoad"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = ElevatedLoad" ];
+          source_matchers = [ "alertname =~ (Very)HighLoad" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = HighLoad"];
-          source_matchers = ["alertname = VeryHighLoad"];
-          equal = ["instance"];
+          target_matchers = [ "alertname = HighLoad" ];
+          source_matchers = [ "alertname = VeryHighLoad" ];
+          equal = [ "instance" ];
         }
         {
-          target_matchers = ["alertname = BlackboxProbeFaile"];
-          source_matchers = ["alertname = InstanceDown"];
+          target_matchers = [ "alertname = BlackboxProbeFaile" ];
+          source_matchers = [ "alertname = InstanceDown" ];
           equal = [ "host" ];
         }
         {
-          target_matchers = ["alertname = InstanceDownAny"];
-          source_matchers = ["alertname = InstanceDown"];
+          target_matchers = [ "alertname = InstanceDownAny" ];
+          source_matchers = [ "alertname = InstanceDown" ];
           equal = [ "instance" ];
         }
       ];

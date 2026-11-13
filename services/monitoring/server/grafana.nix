@@ -6,7 +6,8 @@
 
 let
   domain = "monitoring.${baseDomain}";
-in {
+in
+{
   sops.secrets = {
     "grafana/secret_key".owner = "grafana";
     "grafana/smtp_password".owner = "grafana";
@@ -18,7 +19,8 @@ in {
     enable = true;
     ensureDatabases = [ "grafana" ];
     ensureUsers = [
-      { name = "grafana";
+      {
+        name = "grafana";
         ensureDBOwnership = true;
       }
     ];

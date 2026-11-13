@@ -36,15 +36,14 @@
         "type": "github"
       },
       "original": {
-        "id": "flake-utils",
-        "type": "indirect"
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
       }
     },
     "freescout-nix": {
       "inputs": {
-        "flake-utils": [
-          "flake-utils"
-        ],
+        "flake-utils": "flake-utils",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -106,7 +105,6 @@
     "root": {
       "inputs": {
         "colmena": "colmena",
-        "flake-utils": "flake-utils",
         "freescout-nix": "freescout-nix",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix"
